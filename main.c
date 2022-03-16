@@ -20,7 +20,7 @@ void initRegisters() {
         registers[i] = REG_INIT_VAL;
     }
 
-    // assign R0~9 registers to address of each element of static array
+    // map R0~9 registers to address of each element of static array
     R0 = registers;
     R1 = registers + 1;
     R2 = registers + 2;
