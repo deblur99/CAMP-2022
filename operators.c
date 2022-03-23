@@ -53,7 +53,7 @@ char** getOneOperationFromTxt(FILE *fp, char *buf[]) {
 
     // debug: print all tokens
     for (int i = 0; i < idx; i++) {
-        printf("%ld ", sizeof(buf));
+        printf("%ld ", sizeof(buf[i]));
     }
     printf("\n");
 
