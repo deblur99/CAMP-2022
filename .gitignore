@@ -1,2 +1,5 @@
 str_arr_ex.c
 str_arr_ex
+./cmake-build-debug
+CMakeLists.txt
+.idea

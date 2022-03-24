@@ -1,6 +1,6 @@
 #include "operators.h"
 
-extern int registers[AMOUNT_REGS];
+static int registers[AMOUNT_REGS];
 
 // registers (R0 ~  R9; as global variables)
 // initialize their values into 0x0
@@ -19,56 +19,63 @@ void initRegisters() {
     for (int i = 0; i < AMOUNT_REGS; i++) {
         registers[i] = REG_INIT_VAL;
     }
-
-    // old
-    // map R0~9 registers to address of each element of static array
-    // R0 = registers;
-    // R1 = registers + 1;
-    // R2 = registers + 2;
-    // R3 = registers + 3;
-    // R4 = registers + 4;
-    // R5 = registers + 5;
-    // R6 = registers + 6;
-    // R7 = registers + 7;
-    // R8 = registers + 8;
-    // R9 = registers + 9;
-
-    // debug
-    for (int i = 0; i < AMOUNT_REGS; i++)
-        printf("%d ", *registers + i);
 }
 
 int main(int argc, char *argv[]) {
-    // initialize
     initRegisters();
 
-    FILE *fp = fopen("./myinput.txt", "r");
-    char **stringArr = (char **)malloc(sizeof(char *) * BUF_LENGTH);
-
-    for (int i = 0; i < BUF_LENGTH; i++) {
-        stringArr[i] = (char *)malloc(sizeof(char) * BUF_LENGTH);
+    FILE *fp = fopen("myinput.txt", "r");
+    if (fp == NULL) {
+        perror("File Not Found");
+        return -1;
     }
 
-    // debug (below 3 lines)
-    fseek(fp, 0, SEEK_END);
-    printf("length of input.txt : %d\n", (int)(ftell(fp)));
-    fseek(fp, 0, SEEK_SET);
+    char *stringArr[AMOUNT_REGS] = { NULL, };
+    for (int i = 0; i < AMOUNT_REGS; i++) {
+        stringArr[i] = (char *)malloc(sizeof(char) * AMOUNT_REGS);
+    }
+    char *lineString = (char *)malloc(sizeof(char) * BUF_LENGTH);
+    char *letter = (char *)malloc(sizeof(char) * 2);
 
     // get string from input.txt
-    while (feof(fp) != TRUE)
-        stringArr = getOneOperationFromTxt(fp, stringArr);
+    while (feof(fp) != TRUE) {
+        memset(lineString, '\0', BUF_LENGTH);
+        memset(letter, '\0', 2);
 
+        // get one line from input.txt
+        while (fread(letter, sizeof(char), 1, fp) &&
+            feof(fp) != TRUE &&
+            strcmp(letter, "\n") != 0) {
 
-    // TO DO : process the string
-    
+            if (lineString[0] == '\0') {
+                strcpy(lineString, letter);
+            } else {
+                strcat(lineString, letter);
+            }
+        }
 
-    // free both dynamic memory and file pointer
-    for (int i = 0; i < BUF_LENGTH; i++) {
-        free(stringArr[i]);
+        // tokenize the gotten line
+        int idx = 0;
+        char *tok = (char *)malloc(sizeof(char) * BUF_LENGTH);
+
+        tok = strtok(lineString, " ");
+        strcpy(stringArr[idx++], tok);
+
+        while (tok != NULL) {
+            tok = strtok(NULL, " ");
+            if (tok != NULL)
+                strcpy(stringArr[idx++], tok);
+        }
+
+        // TO DO : process command from "stringArr"
+        
     }
 
-    free(stringArr);
-
+    free(letter);
+    free(lineString);
+    for (int i = 0; i < AMOUNT_REGS; i++) {
+        free(stringArr[i]);
+    }
     fclose(fp);
 
     return 0;

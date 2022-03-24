@@ -27,7 +27,7 @@
                     "ignoreFailures": true
                 }
             ],
-            "preLaunchTask": "save and compile for C",
+            //"preLaunchTask": "save and compile for C",
             "miDebuggerPath": "/usr/bin/gdb"
         }
     ]

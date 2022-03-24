@@ -8,6 +8,3 @@
 
 #define AMOUNT_REGS     10
 #define REG_INIT_VAL    0x0
-
-// registers (R0 ~ R9)
-int registers[AMOUNT_REGS];
