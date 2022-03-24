@@ -1,5 +1,10 @@
 #include "operators.h"
 
+const int OPCODE = 0;
+const int OPERAND1 = 1;
+const int OPERAND2 = 2;
+
+
 static int registers[AMOUNT_REGS];
 
 // registers (R0 ~  R9; as global variables)
@@ -68,7 +73,15 @@ int main(int argc, char *argv[]) {
         }
 
         // TO DO : process command from "stringArr"
-        
+        int operand1 = 0, operand2 = 0;
+
+        operand1 = atoi(stringArr[OPERAND1]);
+        operand2 = atoi(stringArr[OPERAND2]);
+
+        switch (stringArr[OPCODE][0]) {
+        case 'M':
+            mov(operand1, operand2);     
+        }
     }
 
     free(letter);
