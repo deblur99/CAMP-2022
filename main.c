@@ -1,5 +1,5 @@
+#include "defines.h"
 #include "operators.h"
-#include <stdbool.h>
 
 enum _TARGET {
     OPCODE = 0,
@@ -14,18 +14,18 @@ enum _USING_REGISTER {
 
 static int registers[AMOUNT_REGS];
 
-// registers (R0 ~  R9; as global variables)
+// registers (R0 ~ R9; as global variables)
 // initialize their values into 0x0
-const static int *R0 = registers;
-const static int *R1 = registers + 1;
-const static int *R2 = registers + 2;
-const static int *R3 = registers + 3;
-const static int *R4 = registers + 4;
-const static int *R5 = registers + 5;
-const static int *R6 = registers + 6;
-const static int *R7 = registers + 7;
-const static int *R8 = registers + 8;
-const static int *R9 = registers + 9;
+static int *R0 = registers + R0_POINT;
+static int *R1 = registers + R1_POINT;
+static int *R2 = registers + R2_POINT;
+static int *R3 = registers + R3_POINT;
+static int *R4 = registers + R4_POINT;
+static int *R5 = registers + R5_POINT;
+static int *R6 = registers + R6_POINT;
+static int *R7 = registers + R7_POINT;
+static int *R8 = registers + R8_POINT;
+static int *R9 = registers + R9_POINT;
 
 void initRegisters() {
     for (int i = 0; i < AMOUNT_REGS; i++) {
@@ -42,35 +42,32 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    char *stringArr[AMOUNT_REGS] = { NULL, };
+    char *stringArr[AMOUNT_REGS] = { NULL, }; // for saving tokens of tokinized string
     for (int i = 0; i < AMOUNT_REGS; i++) {
         stringArr[i] = (char *)malloc(sizeof(char) * AMOUNT_REGS);
     }
-    char *lineString = (char *)malloc(sizeof(char) * BUF_LENGTH);
-    char *letter = (char *)malloc(sizeof(char) * 2);
+    char *letter = (char *)malloc(sizeof(char) * BUF_LETTER_LENGTH); // for saving one letter of fullString
+    char *fullString = (char *)malloc(sizeof(char) * BUF_LENGTH); // for saving one line of input.txt
 
-    // get string from input.txt
     while (feof(fp) != TRUE) {
-        memset(lineString, '\0', BUF_LENGTH);
-        memset(letter, '\0', 2);
+        memset(letter, '\0', BUF_LETTER_LENGTH);
+        memset(fullString, '\0', BUF_LENGTH);
 
-        // get one line from input.txt
-        while (fread(letter, sizeof(char), 1, fp) &&
+        while (fread(letter, sizeof(char), BUF_LETTER_LENGTH - 1, fp) &&
             feof(fp) != TRUE &&
             strcmp(letter, "\n") != 0) {
 
-            if (lineString[0] == '\0') {
-                strcpy(lineString, letter);
+            if (fullString[0] == '\0') {
+                strcpy(fullString, letter);
             } else {
-                strcat(lineString, letter);
+                strcat(fullString, letter);
             }
         }
 
-        // tokenize the gotten line
         int idx = 0;
         char *tok = (char *)malloc(sizeof(char) * BUF_LENGTH);
 
-        tok = strtok(lineString, " ");
+        tok = strtok(fullString, " ");
         strcpy(stringArr[idx++], tok);
 
         while (tok != NULL) {
@@ -78,16 +75,15 @@ int main(int argc, char *argv[]) {
             if (tok != NULL)
                 strcpy(stringArr[idx++], tok);
         }
-        
-
-        // save register number to be used
-        int target1 = 0, target2 = 0;
 
         // TO DO : parse string elements of stringArr
         // check string denotes register or value
-        if (stringArr[OPERAND1][0] == 'R' && strlen(stringArr[OPERAND1] == 2)) {
-            if (isdigit(stringArr[OPERAND1][1])) {
-                switch (stringArr[OPERAND1][1]) {
+        int target1 = 0, target2 = 0;
+        if (stringArr[OPERAND1][IS_REGISTER_TOKEN] == 'R' &&
+            strlen(stringArr[OPERAND1]) == IS_REGISTER) {
+
+            if (isdigit(stringArr[OPERAND1][REGISTER_NUMBER])) {
+                switch (stringArr[OPERAND1][REGISTER_NUMBER]) {
                 case '0':
                     target1 = REG0;
                     break;
@@ -127,12 +123,15 @@ int main(int argc, char *argv[]) {
                 case '9':
                     target1 = REG9;
                     break;
+                }
             }
         }
 
-        if (stringArr[OPERAND2][0] == 'R' && strlen(stringArr[OPERAND2] == 2)) {
-            if (isdigit(stringArr[OPERAND2][1])) {
-                switch (stringArr[OPERAND2][1]) {
+        if (stringArr[OPERAND2][IS_REGISTER_TOKEN] == 'R' &&
+            strlen(stringArr[OPERAND2]) == IS_REGISTER) {
+
+            if (isdigit(stringArr[OPERAND2][REGISTER_NUMBER])) {
+                switch (stringArr[OPERAND2][REGISTER_NUMBER]) {
                 case '0':
                     target2 = REG0;
                     break;
@@ -181,23 +180,11 @@ int main(int argc, char *argv[]) {
 
         operand1 = atoi(stringArr[OPERAND1]);
         operand2 = atoi(stringArr[OPERAND2]);
-
-        switch (stringArr[OPCODE][0]) {
-        case 'M':
-            mov(operand1, operand2);     
-        case '+':
-            add(operand1, operand2);
-        case '-':
-            sub(operand1, operand2);
-        case '*':
-            multiply(operand1, operand2);
-        case '/':
-            divide(operand1, operand2);
-        }
     }
 
+    // after all tasks end, terminate program
+    free(fullString);
     free(letter);
-    free(lineString);
     for (int i = 0; i < AMOUNT_REGS; i++) {
         free(stringArr[i]);
     }
