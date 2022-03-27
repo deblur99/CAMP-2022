@@ -1,5 +1,4 @@
 #include "defines.h"
-#include "operators.h"
 
 static int registers[AMOUNT_REGS];
 
@@ -32,6 +31,8 @@ char* readFromInputFile(FILE *fp, char *buffer);
 
 int getOperator(OPERATOR *result, char *raw);
 
+int executeExpression(OPERATOR *expression);
+
 int main(int argc, char *argv[]) {
     // initialize
     initRegisters();
@@ -46,6 +47,7 @@ int main(int argc, char *argv[]) {
 
     char *fullString = (char *)malloc(sizeof(char) * BUF_LENGTH); // for saving one line of input.txt
 
+    // running actual task
     while (feof(fp) != TRUE) {
         fullString = readFromInputFile(fp, fullString);
 
@@ -58,7 +60,16 @@ int main(int argc, char *argv[]) {
 
         // debug
         printf("%s %s %s\n", expression->opcode, expression->op1, expression->op2);
-        
+
+        // TO DO : call executing function with expression struct argument
+        // and process it on the called function by value of the argument
+        if (!executeExpression(expression)) {
+            free(fullString);
+            free(expression);
+            fclose(fp);
+            return -1;
+        }
+
         memset(expression, '\0', sizeof(OPERATOR));
         memset(fullString, '\0', BUF_LENGTH);
     }
@@ -141,6 +152,31 @@ int getOperator(OPERATOR *result, char *raw) {
             printf("Error: Invalid Input\n");
             return FALSE;
         }
+    }
+
+    return TRUE;
+}
+
+int executeExpression(OPERATOR *expression) {
+    switch (*(expression->opcode)) {
+        case 'M':
+            break;
+        
+        case '+':
+            break;
+            
+        case '-':
+            break;
+            
+        case '*':
+            break;
+            
+        case '/':
+            break;
+        
+        default:
+            printf("Error: invalid opcode\n");
+            return FALSE;
     }
 
     return TRUE;
