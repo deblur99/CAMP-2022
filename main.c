@@ -34,18 +34,14 @@ int getOperator(OPERATOR *result, char *raw);
 int executeExpression(OPERATOR *expression);
 
 int main(int argc, char *argv[]) {
-    // initialize
     initRegisters();
-
+    char *fullString = (char *)malloc(sizeof(char) * BUF_LENGTH); // for saving one line of input.txt
     OPERATOR *expression = (OPERATOR *)malloc(sizeof(OPERATOR));
-
     FILE *fp = fopen("myinput.txt", "r");
     if (fp == NULL) {
         perror("File Not Found");
         return -1;
-    }
-
-    char *fullString = (char *)malloc(sizeof(char) * BUF_LENGTH); // for saving one line of input.txt
+    }    
 
     // running actual task
     while (feof(fp) != TRUE) {
