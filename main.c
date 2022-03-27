@@ -1,17 +1,6 @@
 #include "defines.h"
 #include "operators.h"
 
-enum _TARGET {
-    OPCODE = 0,
-    OPERAND1,
-    OPERAND2
-};
-
-enum _USING_REGISTER {
-    REG0 = 0,
-    REG1, REG2, REG3, REG4, REG5, REG6, REG7, REG8, REG9
-};
-
 static int registers[AMOUNT_REGS];
 
 // registers (R0 ~ R9; as global variables)
@@ -33,8 +22,21 @@ void initRegisters() {
     }
 }
 
+typedef struct _OPERATOR {
+    char opcode[OP_LENGTH];
+    char op1[OP_LENGTH];
+    char op2[OP_LENGTH];
+}OPERATOR;
+
+char* readFromInputFile(FILE *fp, char *buffer);
+
+int getOperator(OPERATOR *foo, char *raw);
+
 int main(int argc, char *argv[]) {
+    // initialize
     initRegisters();
+
+    OPERATOR *expression = (OPERATOR *)malloc(sizeof(OPERATOR));
 
     FILE *fp = fopen("myinput.txt", "r");
     if (fp == NULL) {
@@ -42,153 +44,104 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    char *stringArr[AMOUNT_REGS] = { NULL, }; // for saving tokens of tokinized string
-    for (int i = 0; i < AMOUNT_REGS; i++) {
-        stringArr[i] = (char *)malloc(sizeof(char) * AMOUNT_REGS);
-    }
-    char *letter = (char *)malloc(sizeof(char) * BUF_LETTER_LENGTH); // for saving one letter of fullString
     char *fullString = (char *)malloc(sizeof(char) * BUF_LENGTH); // for saving one line of input.txt
 
     while (feof(fp) != TRUE) {
-        memset(letter, '\0', BUF_LETTER_LENGTH);
+        fullString = readFromInputFile(fp, fullString);
+
+        if (!getOperator(expression, fullString)) {
+            free(fullString);
+            free(expression);
+            fclose(fp);
+            return -1;
+        }
+
+        // debug
+        printf("%s %s %s\n", expression->opcode, expression->op1, expression->op2);
+        
+        memset(expression, '\0', sizeof(OPERATOR));
         memset(fullString, '\0', BUF_LENGTH);
-
-        while (fread(letter, sizeof(char), BUF_LETTER_LENGTH - 1, fp) &&
-            feof(fp) != TRUE &&
-            strcmp(letter, "\n") != 0) {
-
-            if (fullString[0] == '\0') {
-                strcpy(fullString, letter);
-            } else {
-                strcat(fullString, letter);
-            }
-        }
-
-        int idx = 0;
-        char *tok = (char *)malloc(sizeof(char) * BUF_LENGTH);
-
-        tok = strtok(fullString, " ");
-        strcpy(stringArr[idx++], tok);
-
-        while (tok != NULL) {
-            tok = strtok(NULL, " ");
-            if (tok != NULL)
-                strcpy(stringArr[idx++], tok);
-        }
-
-        // TO DO : parse string elements of stringArr
-        // check string denotes register or value
-        int target1 = 0, target2 = 0;
-        if (stringArr[OPERAND1][IS_REGISTER_TOKEN] == 'R' &&
-            strlen(stringArr[OPERAND1]) == IS_REGISTER) {
-
-            if (isdigit(stringArr[OPERAND1][REGISTER_NUMBER])) {
-                switch (stringArr[OPERAND1][REGISTER_NUMBER]) {
-                case '0':
-                    target1 = REG0;
-                    break;
-                
-                case '1':
-                    target1 = REG1;
-                    break;
-                
-                case '2':
-                    target1 = REG2;
-                    break;
-                    
-                case '3':
-                    target1 = REG3;
-                    break;
-                
-                case '4':
-                    target1 = REG4;
-                    break;
-
-                case '5':
-                    target1 = REG5;
-                    break;
-
-                case '6':
-                    target1 = REG6;
-                    break;
-
-                case '7':
-                    target1 = REG7;
-                    break;
-
-                case '8':
-                    target1 = REG8;
-                    break;
-
-                case '9':
-                    target1 = REG9;
-                    break;
-                }
-            }
-        }
-
-        if (stringArr[OPERAND2][IS_REGISTER_TOKEN] == 'R' &&
-            strlen(stringArr[OPERAND2]) == IS_REGISTER) {
-
-            if (isdigit(stringArr[OPERAND2][REGISTER_NUMBER])) {
-                switch (stringArr[OPERAND2][REGISTER_NUMBER]) {
-                case '0':
-                    target2 = REG0;
-                    break;
-                
-                case '1':
-                    target2 = REG1;
-                    break;
-                
-                case '2':
-                    target2 = REG2;
-                    break;
-                    
-                case '3':
-                    target2 = REG3;
-                    break;
-                
-                case '4':
-                    target2 = REG4;
-                    break;
-
-                case '5':
-                    target2 = REG5;
-                    break;
-
-                case '6':
-                    target2 = REG6;
-                    break;
-
-                case '7':
-                    target2 = REG7;
-                    break;
-
-                case '8':
-                    target2 = REG8;
-                    break;
-
-                case '9':
-                    target2 = REG9;
-                    break;
-                }
-            }
-        }        
-
-        // TO DO : process command from "stringArr"
-        int operand1 = 0, operand2 = 0;
-
-        operand1 = atoi(stringArr[OPERAND1]);
-        operand2 = atoi(stringArr[OPERAND2]);
     }
 
     // after all tasks end, terminate program
     free(fullString);
-    free(letter);
-    for (int i = 0; i < AMOUNT_REGS; i++) {
-        free(stringArr[i]);
-    }
     fclose(fp);
 
     return 0;
+}
+
+char* readFromInputFile(FILE *fp, char *buffer) {
+    memset(buffer, '\0', BUF_LENGTH);
+    char *letter = (char *)malloc(sizeof(char) * BUF_LETTER_LENGTH); // for saving one letter of fullString
+    memset(letter, '\0', BUF_LETTER_LENGTH);
+
+    while (fread(letter, sizeof(char), BUF_LETTER_LENGTH - 1, fp) &&
+           feof(fp) != TRUE &&
+           strcmp(letter, "\n") != 0) {
+
+        if (buffer[0] == '\0') {
+            strcpy(buffer, letter);
+        } else {
+            strcat(buffer, letter);
+        }
+    }    
+
+    return buffer;
+}
+
+int getOperator(OPERATOR *foo, char *raw) {
+    char *tok = malloc(sizeof(char) * OP_LENGTH);
+
+    tok = strtok(raw, " ");
+    if ((// essential
+         strcmp(tok, "M") == 0 ||  // mov
+         strcmp(tok, "+") == 0 ||  // add
+         strcmp(tok, "-") == 0 ||  // sub
+         strcmp(tok, "*") == 0 ||  // mul
+         strcmp(tok, "/") == 0 ||  // div
+         // additional
+         strcmp(tok, "H") == 0 ||  // halt
+         strcmp(tok, "J") == 0 ||  // jump
+         strcmp(tok, "C") == 0 ||  // compare
+         strcmp(tok, "B") == 0)) { // branch
+
+        strcpy(foo->opcode, tok);
+    } else {
+        printf("Error: Invalid Input\n");
+        return FALSE;
+    }
+
+    tok = strtok(NULL, " ");
+    if (strlen(tok) == 2) {
+        if (tok[0] == 'R') {
+            if (tok[1] >= '0' && tok[1] <= '9') {
+                strcpy(foo->op1, tok);
+            }
+        }
+    } else {
+        if (strncmp(tok, "0x", 2) == 0) {
+            strcpy(foo->op1, tok);
+        } else {
+            printf("Error: Invalid Input\n");
+            return FALSE;
+        }
+    }
+
+    tok = strtok(NULL, " ");
+    if (strlen(tok) == 2) {
+        if (tok[0] == 'R') {
+            if (tok[1] >= '0' && tok[1] <= '9') {
+                strcpy(foo->op2, tok);
+            }
+        }
+    } else {
+        if (strncmp(tok, "0x", 2) == 0) {
+            strcpy(foo->op2, tok);
+        } else {
+            printf("Error: Invalid Input\n");
+            return FALSE;
+        }
+    }
+
+    return TRUE;
 }

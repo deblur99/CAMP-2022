@@ -23,6 +23,4 @@
 #define BUF_LENGTH              200
 #define BUF_LETTER_LENGTH       2
 
-#define IS_REGISTER_TOKEN       0   // first letter of register is 'R'
-#define REGISTER_NUMBER         1   
-#define IS_REGISTER             2   // length of register is 2
+#define OP_LENGTH               10
