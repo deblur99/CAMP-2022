@@ -18,9 +18,6 @@ int getOperator(OPERATOR *foo, char *raw);
 
 int main() {
     OPERATOR *foo = (OPERATOR *)malloc(sizeof(OPERATOR));
-
-    // call read() -> save into raw
-
     char *raw = (char *)malloc(sizeof(char) * OP_LENGTH);
 
     strcpy(raw, "M R 0x3");

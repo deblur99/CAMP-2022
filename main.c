@@ -33,6 +33,26 @@ int getOperator(OPERATOR *result, char *raw);
 
 int executeExpression(OPERATOR *expression);
 
+void showCalcResult(OPERATOR *expression, int result);
+
+int mov(OPERATOR *expression);
+
+int add(OPERATOR *expression);
+
+int subtract(OPERATOR *expression);
+
+int multiply(OPERATOR *expression);
+
+int divide(OPERATOR *expression);
+
+int halt(OPERATOR *expression);
+
+int jump(OPERATOR *expression);
+
+int compare(OPERATOR *expression);
+
+int branch(OPERATOR *expression);
+
 int main(int argc, char *argv[]) {
     initRegisters();
     char *fullString = (char *)malloc(sizeof(char) * BUF_LENGTH); // for saving one line of input.txt
@@ -41,7 +61,7 @@ int main(int argc, char *argv[]) {
     if (fp == NULL) {
         perror("File Not Found");
         return -1;
-    }    
+    }
 
     // running actual task
     while (feof(fp) != TRUE) {
@@ -156,18 +176,23 @@ int getOperator(OPERATOR *result, char *raw) {
 int executeExpression(OPERATOR *expression) {
     switch (*(expression->opcode)) {
         case 'M':
+            showCalcResult(expression, mov(expression));
             break;
         
         case '+':
+            showCalcResult(expression, add(expression));
             break;
             
         case '-':
+            showCalcResult(expression, subtract(expression));
             break;
             
         case '*':
+            showCalcResult(expression, multiply(expression));
             break;
             
         case '/':
+            showCalcResult(expression, divide(expression));
             break;
         
         default:
@@ -176,4 +201,51 @@ int executeExpression(OPERATOR *expression) {
     }
 
     return TRUE;
+}
+
+int mov(OPERATOR *expression) {
+    if (*expression->op1 != 'R') {
+        return -1;
+    }
+    return TRUE;
+}
+
+int add(OPERATOR *expression) {
+    return TRUE;
+}
+
+int subtract(OPERATOR *expression) {
+    return TRUE;
+}
+
+int multiply(OPERATOR *expression) {
+    return TRUE;
+}
+
+int divide(OPERATOR *expression) {
+    return TRUE;
+}
+
+int halt(OPERATOR *expression) {
+    return TRUE;
+}
+
+int jump(OPERATOR *expression) {
+    return TRUE;
+}
+
+int compare(OPERATOR *expression) {
+    return TRUE;
+}
+
+int branch(OPERATOR *expression) {
+    return TRUE;
+}
+
+void showCalcResult(OPERATOR *expression, int result) {
+    if (expression->op1[0] != 'R') {
+        printf("=> R0: %d\n", result);
+    } else {
+        printf("=> %s: %d\n", expression->op1, result);
+    }
 }
