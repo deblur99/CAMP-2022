@@ -2,6 +2,7 @@
 
 static int registers[AMOUNT_REGS];
 
+// to be deleted below varables (R0 ~ R9)
 // registers (R0 ~ R9; as global variables)
 // initialize their values into 0x0
 static int *R0 = registers + R0_POINT;
@@ -55,6 +56,9 @@ int branch(OPERATOR *expression);
 
 int main(int argc, char *argv[]) {
     initRegisters();
+    *R1 = 10; // debug
+    printf("%d\n", *R1); // debug
+
     char *fullString = (char *)malloc(sizeof(char) * BUF_LENGTH); // for saving one line of input.txt
     OPERATOR *expression = (OPERATOR *)malloc(sizeof(OPERATOR));
     FILE *fp = fopen("myinput.txt", "r");
@@ -74,8 +78,7 @@ int main(int argc, char *argv[]) {
             return -1;
         }
 
-        // debug
-        printf("%s %s %s\n", expression->opcode, expression->op1, expression->op2);
+        printf("%s %s %s ", expression->opcode, expression->op1, expression->op2);
 
         // TO DO : call executing function with expression struct argument
         // and process it on the called function by value of the argument
@@ -207,11 +210,39 @@ int mov(OPERATOR *expression) {
     if (*expression->op1 != 'R') {
         return -1;
     }
-    return TRUE;
+
+    *(registers + expression->op1[1]) = strtol(expression->op2, NULL, 16);
+
+    return (int)strtol(expression->op2, NULL, 16);
 }
 
 int add(OPERATOR *expression) {
-    return TRUE;
+    // 1) Rn + Rm -> Rn
+    // 2) Rn + number -> Rn
+    // 3) number + number -> R0
+
+    // 1) case
+    if (expression->op1[0] == 'R' && expression->op2[0] == 'R') {
+        *registers = *(registers + expression->op1[1]) + *(registers + expression->op2[1]);
+        return *(registers + expression->op1[1]) + *(registers + expression->op2[1]);
+    }
+
+    // 2) case
+    if (expression->op1[0] == 'R' && expression->op2[0] != 'R') {
+        *(registers + expression->op1[1]) += strtol(expression->op2, NULL, 16);
+        return *(registers + expression->op1[1]);
+    } else if (expression->op1[0] != 'R' && expression->op2[0] == 'R') {
+        *(registers + expression->op2[1]) += strtol(expression->op1, NULL, 16);
+        return *(registers + expression->op2[1]);
+    }
+
+    // 3) case
+    if (expression->op1[0] != 'R' && expression->op2[0] != 'R') {
+        *registers = strtol(expression->op1, NULL, 16) + strtol(expression->op2, NULL, 16);
+        return *registers;
+    }
+
+    return 0;
 }
 
 int subtract(OPERATOR *expression) {
@@ -243,9 +274,23 @@ int branch(OPERATOR *expression) {
 }
 
 void showCalcResult(OPERATOR *expression, int result) {
-    if (expression->op1[0] != 'R') {
-        printf("=> R0: %d\n", result);
+    if (expression->op1[0] != 'R' && expression->op1[0] != 'R') {
+        if (strncmp(expression->opcode, "M", 1) != 0) {
+            printf("=> R0: 0x%X = 0x%lX %s 0x%lX\n", 
+                result, 
+                *(registers + expression->op1[1]) - strtol(expression->op2, NULL, 16),
+                expression->opcode, strtol(expression->op2, NULL, 16));
+        } else {
+            printf("=> R0: 0x%X\n", result);
+        }
     } else {
-        printf("=> %s: %d\n", expression->op1, result);
+        if (strncmp(expression->opcode, "M", 1) != 0) {
+            printf("=> %s: 0x%X = 0x%lX %s 0x%lX\n",
+                expression->op1, result, 
+                *(registers + expression->op1[1]) - strtol(expression->op2, NULL, 16),
+                expression->opcode, strtol(expression->op2, NULL, 16));
+        } else {
+            printf("=> %s: 0x%X\n", expression->op1, result);
+        }
     }
 }
