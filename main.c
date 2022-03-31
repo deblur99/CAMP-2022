@@ -56,8 +56,6 @@ int branch(OPERATOR *expression);
 
 int main(int argc, char *argv[]) {
     initRegisters();
-    *R1 = 10; // debug
-    printf("%d\n", *R1); // debug
 
     char *fullString = (char *)malloc(sizeof(char) * BUF_LENGTH); // for saving one line of input.txt
     OPERATOR *expression = (OPERATOR *)malloc(sizeof(OPERATOR));
