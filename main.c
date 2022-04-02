@@ -47,8 +47,6 @@ int multiply(OPERATOR *expression);
 
 int divide(OPERATOR *expression);
 
-int halt(OPERATOR *expression);
-
 int jump(OPERATOR *expression);
 
 int compare(OPERATOR *expression);
@@ -198,6 +196,10 @@ int executeExpression(OPERATOR *expression) {
 
         case 'H':
             return FALSE;
+
+        case 'C':
+            showCalcResult(expression, compare(expression));
+            break;
         
         default:
             printf("Error: invalid opcode\n");
@@ -343,16 +345,42 @@ int divide(OPERATOR *expression) {
     return 0;
 }
 
-int halt(OPERATOR *expression) {
-    return TRUE;
-}
-
 int jump(OPERATOR *expression) {
     return TRUE;
 }
 
 int compare(OPERATOR *expression) {
-    return TRUE;
+    // R or 0x
+    // op1 >= op2 -> R0 = 0
+    // op1 < op2 -> R0 = 1
+
+    if (expression->op1[0] == 'R' && expression->op2[0] == 'R') {
+        if (*(registers + expression->op1[1]) >= *(registers + expression->op2[1])) {
+            return 0;
+        } else {
+            return 1;
+        }        
+    }
+
+    // 2) case
+    if (expression->op1[0] == 'R' && expression->op2[0] != 'R') {
+        if (*(registers + expression->op1[1]) >= strtol(expression->op1, NULL, 16)) {
+            return 0;
+        } else {
+            return 1;
+        }
+    }
+
+    // 3) case
+    if (expression->op1[0] != 'R' && expression->op2[0] != 'R') {
+        if (strtol(expression->op1, NULL, 16) >= strtol(expression->op2, NULL, 16)) {
+            return 0;
+        } else {
+            return 1;
+        }
+    }
+
+    return -1;
 }
 
 int branch(OPERATOR *expression) {
@@ -360,21 +388,30 @@ int branch(OPERATOR *expression) {
 }
 
 void showCalcResult(OPERATOR *expression, int result) {
-    if (expression->op1[0] != 'R' && expression->op1[0] != 'R') {
-        if (strncmp(expression->opcode, "M", 1) != 0) {
-            printf("=> R0: %d = %d %s %d\n", 
-                result, 
-                (int)strtol(expression->op1, NULL, 16), expression->opcode, (int)strtol(expression->op2, NULL, 16));
+    // 1) check opcode
+    // 2) check whether op1 is R or 0x
+    if (strncmp(expression->opcode, "M", 1) == 0) {
+        if (expression->op1[1] == 'R') {
+            printf("=> %s: %d\n", expression->op1, result);
         } else {
             printf("=> R0: %d\n", result);
         }
+
+        return;
+    }
+
+    if (strncmp(expression->opcode, "C", 1) == 0) {
+        printf("=> R0: %d\n", result);
+        return;
+    }
+
+    if (expression->op1[0] == 'R') {
+        printf("=> %s: %d = %d %s %d\n",
+            expression->op1, result, 
+            expression->preValue, expression->opcode, (int)strtol(expression->op2, NULL, 16));
     } else {
-        if (strncmp(expression->opcode, "M", 1) != 0) {
-            printf("=> %s: %d = %d %s %d\n",
-                expression->op1, result, 
-                expression->preValue, expression->opcode, (int)strtol(expression->op2, NULL, 16));
-        } else {
-            printf("=> %s: %d\n", expression->op1, result);
-        }
+        printf("=> R0: %d = %d %s %d\n", 
+            result, 
+            (int)strtol(expression->op1, NULL, 16), expression->opcode, (int)strtol(expression->op2, NULL, 16));
     }
 }
