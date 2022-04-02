@@ -26,6 +26,7 @@ typedef struct _OPERATOR {
     char opcode[OP_LENGTH];
     char op1[OP_LENGTH];
     char op2[OP_LENGTH];
+    int preValue; // the op1 value before calculating
 }OPERATOR;
 
 char* readFromInputFile(FILE *fp, char *buffer);
@@ -87,7 +88,6 @@ int main(int argc, char *argv[]) {
             return -1;
         }
 
-        memset(expression, '\0', sizeof(OPERATOR));
         memset(fullString, '\0', BUF_LENGTH);
     }
 
@@ -195,6 +195,9 @@ int executeExpression(OPERATOR *expression) {
         case '/':
             showCalcResult(expression, divide(expression));
             break;
+
+        case 'H':
+            return FALSE;
         
         default:
             printf("Error: invalid opcode\n");
@@ -211,6 +214,8 @@ int mov(OPERATOR *expression) {
 
     *(registers + expression->op1[1]) = strtol(expression->op2, NULL, 16);
 
+    expression->preValue = *(registers + expression->op1[1]);
+
     return (int)strtol(expression->op2, NULL, 16);
 }
 
@@ -221,12 +226,14 @@ int add(OPERATOR *expression) {
 
     // 1) case
     if (expression->op1[0] == 'R' && expression->op2[0] == 'R') {
-        *registers = *(registers + expression->op1[1]) + *(registers + expression->op2[1]);
-        return *(registers + expression->op1[1]) + *(registers + expression->op2[1]);
+        expression->preValue = *(registers + expression->op1[1]);
+        *(registers + expression->op1[1]) += *(registers + expression->op2[1]);
+        return *(registers + expression->op1[1]);
     }
 
     // 2) case
     if (expression->op1[0] == 'R' && expression->op2[0] != 'R') {
+        expression->preValue = *(registers + expression->op1[1]);
         *(registers + expression->op1[1]) += strtol(expression->op2, NULL, 16);
         return *(registers + expression->op1[1]);
     } else if (expression->op1[0] != 'R' && expression->op2[0] == 'R') {
@@ -244,15 +251,96 @@ int add(OPERATOR *expression) {
 }
 
 int subtract(OPERATOR *expression) {
-    return TRUE;
+    // 1) Rn - Rm -> Rn
+    // 2) Rn - number -> Rn
+    // 3) number - number -> R0
+
+    // 1) case
+    if (expression->op1[0] == 'R' && expression->op2[0] == 'R') {
+        expression->preValue = *(registers + expression->op1[1]);
+        *(registers + expression->op1[1]) -= *(registers + expression->op2[1]);
+        return *(registers + expression->op1[1]);
+    }
+
+    // 2) case
+    if (expression->op1[0] == 'R' && expression->op2[0] != 'R') {
+        expression->preValue = *(registers + expression->op1[1]);
+        *(registers + expression->op1[1]) -= strtol(expression->op2, NULL, 16);
+        return *(registers + expression->op1[1]);
+    } else if (expression->op1[0] != 'R' && expression->op2[0] == 'R') {
+        *registers = strtol(expression->op1, NULL, 16) - *(registers + expression->op2[1]);
+        return *registers;
+    }
+
+    // 3) case
+    if (expression->op1[0] != 'R' && expression->op2[0] != 'R') {
+        *registers = strtol(expression->op1, NULL, 16) - strtol(expression->op2, NULL, 16);
+        return *registers;
+    }
+
+    return 0;
 }
 
 int multiply(OPERATOR *expression) {
-    return TRUE;
+    // 1) Rn * Rm -> Rn
+    // 2) Rn * number -> Rn
+    // 3) number * number -> R0
+
+    // 1) case
+    if (expression->op1[0] == 'R' && expression->op2[0] == 'R') {
+        expression->preValue = *(registers + expression->op1[1]);
+        *(registers + expression->op1[1]) *= *(registers + expression->op2[1]);
+        return *(registers + expression->op1[1]);
+    }
+
+    // 2) case
+    if (expression->op1[0] == 'R' && expression->op2[0] != 'R') {
+        expression->preValue = *(registers + expression->op1[1]);
+        *(registers + expression->op1[1]) *= strtol(expression->op2, NULL, 16);
+        return *(registers + expression->op1[1]);
+    } else if (expression->op1[0] != 'R' && expression->op2[0] == 'R') {
+        *registers = strtol(expression->op1, NULL, 16) * (*(registers + expression->op2[1]));
+        return *registers;
+    }
+
+    // 3) case
+    if (expression->op1[0] != 'R' && expression->op2[0] != 'R') {
+        *registers = strtol(expression->op1, NULL, 16) * strtol(expression->op2, NULL, 16);
+        return *registers;
+    }
+
+    return 0;
 }
 
 int divide(OPERATOR *expression) {
-    return TRUE;
+    // 1) Rn / Rm -> Rn
+    // 2) Rn / number -> Rn
+    // 3) number / number -> R0
+
+    // 1) case
+    if (expression->op1[0] == 'R' && expression->op2[0] == 'R') {
+        expression->preValue = *(registers + expression->op1[1]);
+        *(registers + expression->op1[1]) /= *(registers + expression->op2[1]);
+        return *(registers + expression->op1[1]);
+    }
+
+    // 2) case
+    if (expression->op1[0] == 'R' && expression->op2[0] != 'R') {
+        expression->preValue = *(registers + expression->op1[1]);
+        *(registers + expression->op1[1]) /= strtol(expression->op2, NULL, 16);
+        return *(registers + expression->op1[1]);
+    } else if (expression->op1[0] != 'R' && expression->op2[0] == 'R') {
+        *registers = strtol(expression->op1, NULL, 16) / (*(registers + expression->op2[1]));
+        return *registers;
+    }
+
+    // 3) case
+    if (expression->op1[0] != 'R' && expression->op2[0] != 'R') {
+        *registers = strtol(expression->op1, NULL, 16) / strtol(expression->op2, NULL, 16);
+        return *registers;
+    }
+
+    return 0;
 }
 
 int halt(OPERATOR *expression) {
@@ -276,17 +364,15 @@ void showCalcResult(OPERATOR *expression, int result) {
         if (strncmp(expression->opcode, "M", 1) != 0) {
             printf("=> R0: 0x%X = 0x%lX %s 0x%lX\n", 
                 result, 
-                *(registers + expression->op1[1]) - strtol(expression->op2, NULL, 16),
-                expression->opcode, strtol(expression->op2, NULL, 16));
+                strtol(expression->op1, NULL, 16), expression->opcode, strtol(expression->op2, NULL, 16));
         } else {
             printf("=> R0: 0x%X\n", result);
         }
     } else {
         if (strncmp(expression->opcode, "M", 1) != 0) {
-            printf("=> %s: 0x%X = 0x%lX %s 0x%lX\n",
+            printf("=> %s: 0x%X = 0x%X %s 0x%lX\n",
                 expression->op1, result, 
-                *(registers + expression->op1[1]) - strtol(expression->op2, NULL, 16),
-                expression->opcode, strtol(expression->op2, NULL, 16));
+                expression->preValue, expression->opcode, strtol(expression->op2, NULL, 16));
         } else {
             printf("=> %s: 0x%X\n", expression->op1, result);
         }
