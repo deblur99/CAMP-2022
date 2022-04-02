@@ -31,7 +31,9 @@ typedef struct _OPERATOR {
 
 char* readFromInputFile(FILE *fp, char *buffer);
 
-int getOperator(OPERATOR *result, char *raw);
+int getOperator(OPERATOR *expression, char *raw);
+
+void parseOperator(OPERATOR *expression);
 
 int executeExpression(OPERATOR *expression);
 
@@ -115,7 +117,7 @@ char* readFromInputFile(FILE *fp, char *buffer) {
     return buffer;
 }
 
-int getOperator(OPERATOR *result, char *raw) {
+int getOperator(OPERATOR *expression, char *raw) {
     char *tok = malloc(sizeof(char) * OP_LENGTH);
 
     tok = strtok(raw, " ");
@@ -131,7 +133,7 @@ int getOperator(OPERATOR *result, char *raw) {
          strcmp(tok, "C") == 0 ||  // compare
          strcmp(tok, "B") == 0)) { // branch
 
-        strcpy(result->opcode, tok);
+        strcpy(expression->opcode, tok);
     } else {
         printf("Error: Invalid Input\n");
         return FALSE;
@@ -141,12 +143,12 @@ int getOperator(OPERATOR *result, char *raw) {
     if (strlen(tok) == 2) {
         if (tok[0] == 'R') {
             if (tok[1] >= '0' && tok[1] <= '9') {
-                strcpy(result->op1, tok);
+                strcpy(expression->op1, tok);
             }
         }
     } else {
         if (strncmp(tok, "0x", 2) == 0) {
-            strcpy(result->op1, tok);
+            strcpy(expression->op1, tok);
         } else {
             printf("Error: Invalid Input\n");
             return FALSE;
@@ -157,12 +159,12 @@ int getOperator(OPERATOR *result, char *raw) {
     if (strlen(tok) == 2) {
         if (tok[0] == 'R') {
             if (tok[1] >= '0' && tok[1] <= '9') {
-                strcpy(result->op2, tok);
+                strcpy(expression->op2, tok);
             }
         }
     } else {
         if (strncmp(tok, "0x", 2) == 0) {
-            strcpy(result->op2, tok);
+            strcpy(expression->op2, tok);
         } else {
             printf("Error: Invalid Input\n");
             return FALSE;
