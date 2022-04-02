@@ -47,11 +47,7 @@ int multiply(OPERATOR *expression);
 
 int divide(OPERATOR *expression);
 
-int jump(OPERATOR *expression);
-
 int compare(OPERATOR *expression);
-
-int branch(OPERATOR *expression);
 
 int main(int argc, char *argv[]) {
     initRegisters();
@@ -125,11 +121,10 @@ int getOperator(OPERATOR *result, char *raw) {
          strcmp(tok, "-") == 0 ||  // sub
          strcmp(tok, "*") == 0 ||  // mul
          strcmp(tok, "/") == 0 ||  // div
-         // additional
          strcmp(tok, "H") == 0 ||  // halt
-         strcmp(tok, "J") == 0 ||  // jump
-         strcmp(tok, "C") == 0 ||  // compare
-         strcmp(tok, "B") == 0)) { // branch
+         // additional         
+         strcmp(tok, "C") == 0  // compare
+        )) { // branch
 
         strcpy(result->opcode, tok);
     } else {
@@ -345,10 +340,6 @@ int divide(OPERATOR *expression) {
     return 0;
 }
 
-int jump(OPERATOR *expression) {
-    return TRUE;
-}
-
 int compare(OPERATOR *expression) {
     // R or 0x
     // op1 >= op2 -> R0 = 0
@@ -381,10 +372,6 @@ int compare(OPERATOR *expression) {
     }
 
     return -1;
-}
-
-int branch(OPERATOR *expression) {
-    return TRUE;
 }
 
 void showCalcResult(OPERATOR *expression, int result) {
