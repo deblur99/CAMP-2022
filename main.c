@@ -362,19 +362,19 @@ int branch(OPERATOR *expression) {
 void showCalcResult(OPERATOR *expression, int result) {
     if (expression->op1[0] != 'R' && expression->op1[0] != 'R') {
         if (strncmp(expression->opcode, "M", 1) != 0) {
-            printf("=> R0: 0x%X = 0x%lX %s 0x%lX\n", 
+            printf("=> R0: %d = %d %s %d\n", 
                 result, 
-                strtol(expression->op1, NULL, 16), expression->opcode, strtol(expression->op2, NULL, 16));
+                (int)strtol(expression->op1, NULL, 16), expression->opcode, (int)strtol(expression->op2, NULL, 16));
         } else {
-            printf("=> R0: 0x%X\n", result);
+            printf("=> R0: %d\n", result);
         }
     } else {
         if (strncmp(expression->opcode, "M", 1) != 0) {
-            printf("=> %s: 0x%X = 0x%X %s 0x%lX\n",
+            printf("=> %s: %d = %d %s %d\n",
                 expression->op1, result, 
-                expression->preValue, expression->opcode, strtol(expression->op2, NULL, 16));
+                expression->preValue, expression->opcode, (int)strtol(expression->op2, NULL, 16));
         } else {
-            printf("=> %s: 0x%X\n", expression->op1, result);
+            printf("=> %s: %d\n", expression->op1, result);
         }
     }
 }
