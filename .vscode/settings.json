@@ -2,6 +2,9 @@
     "cmake.configureOnOpen": false,
     "files.associations": {
         "*.html": "html",
-        "stdbool.h": "c"
+        "stdbool.h": "c",
+        "defines.h": "c",
+        "operators.h": "c",
+        "tasks.h": "c"
     }
 }
