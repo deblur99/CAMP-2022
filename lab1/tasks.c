@@ -94,7 +94,7 @@ int executeExpression(OPERATOR *expression) {
             if (strtol(expression->op2, NULL, 16) == 0x0) {
                 printf("********* Operator2 value in division cannot be zero *********\n");
                 printf("********* This expression is skipped.                *********\n");
-                return FALSE;
+                return TRUE;
             }
 
             return showCalcResult(expression, divide(expression));

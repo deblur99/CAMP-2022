@@ -172,5 +172,5 @@ int compare(OPERATOR *expression) {
 
 int halt() {
     printf("********* Program terminated.                        *********\n");
-    return -1;
+    return FALSE;
 }
