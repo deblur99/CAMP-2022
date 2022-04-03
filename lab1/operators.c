@@ -170,7 +170,7 @@ int compare(OPERATOR *expression) {
     return -1;
 }
 
-int halt(OPERATOR *expression) {
-    printf("********* Program terminated *********\n");
+int halt() {
+    printf("********* Program terminated.                        *********\n");
     return -1;
 }

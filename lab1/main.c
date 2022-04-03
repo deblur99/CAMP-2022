@@ -26,7 +26,7 @@ int main(int argc, char *argv[]) {
 
         // TO DO : call executing function with expression struct argument
         // and process it on the called function by value of the argument
-        if (!executeExpression(expression)) {
+        if (executeExpression(expression) == -1) {
             free(fullString);
             free(expression);
             fclose(fp);

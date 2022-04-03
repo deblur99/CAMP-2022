@@ -19,4 +19,4 @@ int divide(OPERATOR *expression);
 
 int compare(OPERATOR *expression);
 
-int halt(OPERATOR *expresssion);
+int halt();

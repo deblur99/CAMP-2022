@@ -90,16 +90,24 @@ int executeExpression(OPERATOR *expression) {
             return showCalcResult(expression, multiply(expression));
             
         case '/':
+            // check op2 is not ZERO
+            if (strtol(expression->op2, NULL, 16) == 0x0) {
+                printf("********* Operator2 value in division cannot be zero *********\n");
+                printf("********* This expression is skipped.                *********\n");
+                return FALSE;
+            }
+
             return showCalcResult(expression, divide(expression));
 
         case 'H':
-            return halt(expression);
+            return halt();
 
         case 'C':
             return showCalcResult(expression, compare(expression));
         
         default:
-            printf("Error: invalid opcode\n");
+            printf("********* Error: invalid opcode                         *********\n");
+            printf("********* This expression is skipped.                   *********\n");
             return FALSE;
     }
 }
