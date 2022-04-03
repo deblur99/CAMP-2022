@@ -110,7 +110,7 @@ int showCalcResult(OPERATOR *expression, int result) {
     printf("%s %s %s ", expression->opcode, expression->op1, expression->op2);
 
     if (strncmp(expression->opcode, "M", 1) == 0) {
-        if (expression->op1[1] == 'R') {
+        if (expression->op1[0] == 'R') {
             printf("=> %s: %d\n", expression->op1, result);
         } else {
             printf("=> R0: %d\n", result);
