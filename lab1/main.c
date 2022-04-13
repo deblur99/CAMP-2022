@@ -7,7 +7,7 @@ int main(int argc, char *argv[]) {
     initRegisters();
     char *fullString = (char *)malloc(sizeof(char) * BUF_LENGTH); 
     OPERATOR *expression = (OPERATOR *)malloc(sizeof(OPERATOR));
-    FILE *fp = fopen("myinput.txt", "r");
+    FILE *fp = fopen("input.txt", "r");
     if (fp == NULL) {
         perror("File Not Found");
         return -1;
