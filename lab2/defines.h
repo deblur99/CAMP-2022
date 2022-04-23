@@ -8,15 +8,18 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define MEMORY_SIZE     0x10000 // original size is 0xFFFFFFFF
+#define MEMORY_SIZE     0x1000 // original size is 0xFFFFFFFF
 
 #define OPCODE_MASK     0x000000FF
 
 // opcode list (from MIPS Green Sheet)
+// R type OPCODE is 0 (except MFC0. its opcode is 0x10)
+#define RTYPE           0x0
+
 // R type funct
-#define ADD             0x0 
-#define ADDU            0x0
-#define AND             0x0
+#define ADD             0x20 
+#define ADDU            0x21
+#define AND             0x24
 #define JR              0x08
 #define NOR             0x27
 #define OR              0x25
@@ -65,7 +68,7 @@
 // FI, FR are skipped
 
 // structures
-typedef struct _OPERATOR {
+typedef struct _INSTRUCT {
     char optype[2];
     __uint32_t opcode;      // for R, I, J type
 
@@ -85,7 +88,7 @@ typedef struct _OPERATOR {
 
     __uint32_t branchAddr;  // for Branch (beq, bne)
     __uint32_t jumpAddr;    // for Jump (j, jal)
-}OPERATOR;
+}INSTRUCT;
 
 // ref: https://en.wikibooks.org/wiki/MIPS_Assembly/Register_File
 typedef struct _REGISTERS {
