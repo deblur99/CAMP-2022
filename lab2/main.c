@@ -16,8 +16,43 @@
 
 #include "defines.h"
 
+OPERATOR *operator;
+REGISTERS *regs;
+
 __uint32_t MEMORY[MEMORY_SIZE] = {-1, };    // instructions of .o file will be saved in there
-__uint32_t *PC = NULL;                      // when PC points 0xFFFFFFFF, then terminate the program.
+__uint32_t PC = 0;                      // when PC points 0xFFFFFFFF, then terminate the program.
+static __uint32_t inst = 0x0;
+
+static int amount = 0; // amount of binary values in .o
+
+void initProgram() {  
+    FILE *fp = fopen("/mnt/c/Users/32184893/CAMP-2022/lab2/test_prog/simple.o", "rb");
+    if (fp == NULL) {
+        perror("File Not Found");
+        exit(1);
+    }
+
+    while (!feof(fp)) {
+        fread(&MEMORY[4 * amount++], sizeof(int), 1, fp);
+    }
+    
+    fclose(fp);
+
+    PC = 0x0; // initialize PC to front of MEMORY
+
+    operator = (OPERATOR *)malloc(sizeof(OPERATOR));
+    memset(operator, 0, sizeof(operator));
+
+    regs = (REGISTERS *)malloc(sizeof(REGISTERS));
+    memset(regs, 0, sizeof(REGISTERS));
+    regs->sp = 0x10000000;
+    regs->ra = 0xFFFFFFFF;
+}
+
+void freeMemory() {
+    free(operator);
+    free(regs);
+}
 
 __uint32_t convertFromBigEToLittleE(__uint32_t target) {
     __uint32_t result =          0x00000000;
@@ -36,37 +71,49 @@ __uint32_t convertFromBigEToLittleE(__uint32_t target) {
 }
 
 void fetch() {
-    __uint32_t inst = 0x0;
-    int currentIdx = 0;
-
-    FILE *fp = fopen("/mnt/c/Users/deblu/CAMP/lab2/test_prog/fib.o", "rb");
-    if (fp == NULL) {
-        perror("File Not Found");
-        exit(1);
+    // if PC reaches threshold, then halt the program.
+    if (PC >= MEMORY_SIZE) {
+        return;
     }
+    inst = convertFromBigEToLittleE(MEMORY[PC]);
+    PC += 0x4; // 나중에 마지막 단계까지 구현하면 마지막 단계로 옮기기
+}
+
+void decode() {
+    // get opcode
+    operator->opcode = inst >> 26;
+
+    printf("0x%08X 0x%08X\n", inst, operator->opcode); // debug
     
-    while (!feof(fp)) {
-        while (!feof(fp) && ((inst << 24) != ADDI)) {
-            fread(&inst, sizeof(int), 1, fp);
-        }
-
-        // starting point
-        if (!feof(fp))
-            MEMORY[currentIdx++] = convertFromBigEToLittleE(inst);
-
-        while (!feof(fp)) {
-            fread(&inst, sizeof(int), 1, fp);
-
-            // actual instructions are between addiu (27bd~) and jr (03e0~)
-            if ((inst << 16) == JR) {
-                MEMORY[currentIdx++] = convertFromBigEToLittleE(inst);
-                break;
-            }
-            MEMORY[currentIdx++] = convertFromBigEToLittleE(inst);
-        }
+    switch (operator->opcode) {
+    case 0x27:
+        
+        break;
+    
+    default:
+        break;
     }
 
-    fclose(fp);
+    // while (!feof(fp)) {
+    //     while (!feof(fp) && ((inst << 24) != ADDI)) {
+    //         fread(&inst, sizeof(int), 1, fp);
+    //     }
+
+    //     // starting point
+    //     if (!feof(fp))
+    //         MEMORY[currentIdx++] = convertFromBigEToLittleE(inst);
+
+    //     while (!feof(fp)) {
+    //         fread(&inst, sizeof(int), 1, fp);
+
+    //         // actual instructions are between addiu (27bd~) and jr (03e0~)
+    //         if ((inst << 16) == JR) {
+    //             MEMORY[currentIdx++] = convertFromBigEToLittleE(inst);
+    //             break;
+    //         }
+    //         MEMORY[currentIdx++] = convertFromBigEToLittleE(inst);
+    //     }
+    // }
 }
 
 void show() {
@@ -77,10 +124,23 @@ void show() {
     }
 }
 
+void showCurrentStatus() {
+    
+}
+
 int main(int argc, char *argv[]) {
-    fetch();
+    // bring all binary codes from .o file
+    initProgram();
 
-    show();
+    for (int i = 0; i < amount; i++) {
+        fetch();
+        decode();
+    }
+        
+    showCurrentStatus();
 
+    //show();
+
+    freeMemory();
     return 0;
 }
