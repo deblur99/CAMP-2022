@@ -1,3 +1,4 @@
+// fetch.h depends on handle_reg.h
 #pragma once
 
 #ifndef FETCH_H

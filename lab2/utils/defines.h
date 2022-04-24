@@ -80,21 +80,21 @@ typedef struct _INSTRUCT {
     u_int32_t shmat;       // for R type
     u_int32_t funct;       // for R type
 
-    u_int32_t immed;       // for I type
+    int32_t immed;       // for I type
     
     u_int32_t address;     // for J type
 
-    u_int32_t signExtImm;  // for I type (addi, addiu, lbu, lhu, lw, slti, sltiu, sb, sc, sh, sw, lwcu, ldcl, swcl, sdcl)
-    u_int32_t zeroExtImm;  // for I type (andi, ori)
+    int32_t signExtImm;  // for I type (addi, addiu, lbu, lhu, lw, slti, sltiu, sb, sc, sh, sw, lwcu, ldcl, swcl, sdcl)
+    int32_t zeroExtImm;  // for I type (andi, ori)
 
     u_int32_t branchAddr;  // for Branch (beq, bne)
     u_int32_t jumpAddr;    // for Jump (j, jal)
-    
+
 }INSTRUCT;
 
 // register list ($0 ~ $31, 0x00 ~ 0x1F)
 typedef enum _REG_LIST {
-    zero = 0x0,             // always zero ($0)
+    zero = 0x0,                   // always zero ($0)
     at = 0x1,                     // reserved for assembler ($1)
     
     // 1st, 2nd return value registers ($2, $3)
@@ -124,44 +124,52 @@ typedef enum _REG_LIST {
 
 // ref: https://en.wikibooks.org/wiki/MIPS_Assembly/Register_File
 typedef struct _REGISTERS {
-    u_int32_t zero;          // always zero ($0)
-    u_int32_t at;          // reserved for assembler
+    u_int32_t PC;        // program counter
+
+    // 안 쓰면 지울 수도 있음
+    int32_t *readRegister1;
+    int32_t *readRegister2;
+    int32_t *writeRegister;
+    int32_t *writeData;
+
+    int32_t zero;        // always zero ($0)
+    int32_t at;          // reserved for assembler ($1)
     
-    u_int32_t v0;          // 1st return value ($2)
-    u_int32_t v1;          // 2nd return value ($3)
+    int32_t v0;          // 1st return value ($2)
+    int32_t v1;          // 2nd return value ($3)
 
-    u_int32_t a0;          // function 1st arg ($4)
-    u_int32_t a1;          // function 2nd arg ($5)
-    u_int32_t a2;          // function 3rd arg ($6)
-    u_int32_t a3;          // function 4th arg ($7)
+    int32_t a0;          // function 1st arg ($4)
+    int32_t a1;          // function 2nd arg ($5)
+    int32_t a2;          // function 3rd arg ($6)
+    int32_t a3;          // function 4th arg ($7)
 
-    u_int32_t t0;          // temporary register ($8) 
-    u_int32_t t1;          // temporary register ($9)
-    u_int32_t t2;          // temporary register ($10)
-    u_int32_t t3;          // temporary register ($11)
-    u_int32_t t4;          // temporary register ($12)
-    u_int32_t t5;          // temporary register ($13)
-    u_int32_t t6;          // temporary register ($14)
-    u_int32_t t7;          // temporary register ($15)
+    int32_t t0;          // temporary register ($8) 
+    int32_t t1;          // temporary register ($9)
+    int32_t t2;          // temporary register ($10)
+    int32_t t3;          // temporary register ($11)
+    int32_t t4;          // temporary register ($12)
+    int32_t t5;          // temporary register ($13)
+    int32_t t6;          // temporary register ($14)
+    int32_t t7;          // temporary register ($15)
 
-    u_int32_t s0;          // saved register ($16)
-    u_int32_t s1;          // saved register ($17)
-    u_int32_t s2;          // saved register ($18)
-    u_int32_t s3;          // saved register ($19)
-    u_int32_t s4;          // saved register ($20)
-    u_int32_t s5;          // saved register ($21)
-    u_int32_t s6;          // saved register ($22)
-    u_int32_t s7;          // saved register ($23)
+    int32_t s0;          // saved register ($16)
+    int32_t s1;          // saved register ($17)
+    int32_t s2;          // saved register ($18)
+    int32_t s3;          // saved register ($19)
+    int32_t s4;          // saved register ($20)
+    int32_t s5;          // saved register ($21)
+    int32_t s6;          // saved register ($22)
+    int32_t s7;          // saved register ($23)
 
-    u_int32_t t8;          // more temporary register ($24)
-    u_int32_t t9;          // more temporary register ($25)
+    int32_t t8;          // more temporary register ($24)
+    int32_t t9;          // more temporary register ($25)
 
-    u_int32_t k0;          // reserved for kernel ($26)          
-    u_int32_t k1;          // reserved for kernel ($27)
+    int32_t k0;          // reserved for kernel ($26)          
+    int32_t k1;          // reserved for kernel ($27)
 
-    u_int32_t gp;          // global pointer ($28)
-    u_int32_t sp;          // stack pointer ($29)
-    u_int32_t fp;          // frame pointer ($30)
-    u_int32_t ra;          // return address ($31)
+    int32_t gp;          // global pointer ($28)
+    int32_t sp;          // stack pointer ($29)
+    int32_t fp;          // frame pointer ($30)
+    int32_t ra;          // return address ($31)
 
 }REGISTERS;
