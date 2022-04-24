@@ -4,7 +4,7 @@
 #define FETCH_H
 #endif
 
-#include "defines.h"
+#include "../utils/defines.h"
 
 __uint32_t convertFromBigEToLittleE(__uint32_t target);
 

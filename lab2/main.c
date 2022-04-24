@@ -14,11 +14,11 @@
 6) 매 명령어 실행 끝날 때마다 레지스터의 현재 state, 사용한 명령어의 개수 등등 출력
 */
 
-#include "defines.h"
-#include "init.h"
-#include "fetch.h"
-#include "decode.h"
-#include "handle_reg.h"
+#include "./utils/defines.h"
+#include "./utils/init.h"
+#include "./stages/fetch.h"
+#include "./stages/decode.h"
+#include "./utils/handle_reg.h"
 
 __uint32_t *MEMORY;
 INSTRUCT *inst;

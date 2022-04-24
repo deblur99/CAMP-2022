@@ -4,7 +4,7 @@
 #define DECODE_H
 #endif
 
-#include "defines.h"
+#include "../utils/defines.h"
 
 INSTRUCT* decode(INSTRUCT *inst, __uint32_t target);
 
