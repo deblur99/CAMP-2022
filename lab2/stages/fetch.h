@@ -6,6 +6,6 @@
 
 #include "../utils/defines.h"
 
-__uint32_t convertFromBigEToLittleE(__uint32_t target);
+u_int32_t convertFromBigEToLittleE(u_int32_t target);
 
-__uint32_t fetch(int PC, __uint32_t *MEMORY);
+u_int32_t fetch(int PC, u_int32_t *MEMORY);

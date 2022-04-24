@@ -6,13 +6,13 @@
 
 #include "defines.h"
 
-__uint32_t* initProgram();
+u_int32_t* initProgram();
 
 INSTRUCT* initInstruction();
 
 REGISTERS* initRegisters();
 
-void freeMemory(__uint32_t *memory);
+void freeMemory(u_int32_t *memory);
 
 void freeInstruction(INSTRUCT *inst);
 

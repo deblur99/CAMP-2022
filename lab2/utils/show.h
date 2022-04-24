@@ -6,4 +6,6 @@
 
 #include "defines.h"
 
+void showInstructorAfterDecode(INSTRUCT *inst);
+
 void showCurrentStatus(REGISTERS *regs);

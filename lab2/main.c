@@ -16,11 +16,12 @@
 
 #include "./utils/defines.h"
 #include "./utils/init.h"
+#include "./utils/handle_reg.h"
+#include "./utils/show.h"
 #include "./stages/fetch.h"
 #include "./stages/decode.h"
-#include "./utils/handle_reg.h"
 
-__uint32_t *MEMORY;
+u_int32_t *MEMORY;
 INSTRUCT *inst;
 REGISTERS *regs;
 
@@ -28,15 +29,19 @@ int main(int argc, char *argv[]) {
     // bring all binary codes from .o file
     MEMORY = initProgram();
     regs = initRegisters();
-    __uint32_t PC = 0x0;                      // when PC points 0xFFFFFFFF, then terminate the program.
+    u_int32_t PC = 0x0;                      // when PC points 0xFFFFFFFF, then terminate the program.
 
-    while (PC < MEMORY_SIZE) {
+    while (PC < 0x200) {
         inst = initInstruction();
 
         inst = decode(inst, fetch(PC, MEMORY));
 
+        showInstructorAfterDecode(inst);    
+
         // TO DO
         // execute(inst, regs);
+        
+
         // writeMemory(inst, regs);
         // writeRegister(inst, regs);
         PC = updatePC(PC, inst, regs);
