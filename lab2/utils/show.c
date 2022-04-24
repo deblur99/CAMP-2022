@@ -28,7 +28,7 @@ void showInstructorAfterDecode(INSTRUCT *inst) {
     printf("=========================\n");
 }
 
-void showCurrentStatus(REGISTERS *regs) {
+void showCurrentStatus(u_int32_t regMemory[]) {
     // TO DO : print status of registers by the below notes
     /*
     A. For each instruction execution,

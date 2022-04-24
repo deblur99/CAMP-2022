@@ -8,4 +8,4 @@
 
 void showInstructorAfterDecode(INSTRUCT *inst);
 
-void showCurrentStatus(REGISTERS *regs);
+void showCurrentStatus(u_int32_t regMemory[]);

@@ -1,65 +1,74 @@
 #include "execute.h"
 
-REGISTERS* execute(INSTRUCT *inst, REGISTERS *regs, u_int32_t regMemory[]) {
+void execute(INSTRUCT *inst, u_int32_t regMemory[], u_int32_t *PC) {
     switch (inst->optype[0]) {
     case 'R':
-        return executeRType(inst, regs, regMemory);
+        return executeRType(inst, regMemory, PC);
     
     case 'I':
-        return executeIType(inst, regs, regMemory);
+        return executeIType(inst, regMemory, PC);
 
     case 'J':
-        return executeJType(inst, regs);
+        return executeJType(inst, regMemory, PC);
 
     default:
-        return regs;
+        return;
     }   
 }
 
-REGISTERS* executeRType(INSTRUCT *inst, REGISTERS *regs, u_int32_t regMemory[]) {
-    switch (inst->opcode) {
-    case ADD:
-        
-        break;
-    
-    default:
-        break;
-    }
+void executeRType(INSTRUCT *inst, u_int32_t regMemory[], u_int32_t *PC) {
+    if (inst->opcode != RTYPE &&
+        inst->opcode != MFC0) {
+            return;
+        }
 
-    return regs;
+    if (inst->opcode == RTYPE) {
+        switch (inst->funct) {
+        case ADD:
+        // R[rd] = R[rs] + R[rt]
+            *(regMemory + inst->rd) = *(regMemory + inst->rs) + *(regMemory + inst->rt); 
+            return;
+
+        case JR:
+        // PC = R[rs]
+            *PC = *(regMemory + inst->rs);  
+            return;
+
+        default:
+            return;
+        }
+    }
 }
 
-REGISTERS* executeIType(INSTRUCT *inst, REGISTERS *regs, u_int32_t regMemory[]) {
+void executeIType(INSTRUCT *inst, u_int32_t regMemory[], u_int32_t *PC) {
     switch (inst->opcode) {
     case ADDI:
     // rs가 가리키는 레지스터에 저장되어 있는 값 가져온다.
     // ex) rs가 0x11를 가리키면 0 + 0x11번째, 즉 17번째 레지스터에 저장된 값을 가져온다.
-        *(regMemory + inst->rt) = *(regMemory + inst->rs) + inst->immed;
-        regs->
+        *(regMemory + inst->rt) = *(regMemory + inst->rs) + (u_int32_t)inst->immed;    // R[rt] = R[rs] + SignExtImm
+        return;
 
     case ADDIU:
-        /* code */
-        break;
+        *(regMemory + inst->rt) = *(regMemory + inst->rs) + (u_int32_t)inst->immed;    // R[rt] = R[rs] + SignExtImm
+        return;
     
     default:
-        break;
+        return;
     }
-
-    return regs;
 }
 
-REGISTERS* executeJType(INSTRUCT *inst, REGISTERS *regs) {
+void executeJType(INSTRUCT *inst, u_int32_t regMemory[], u_int32_t *PC) {
     switch (inst->opcode) {
     case J:
-        regs->PC = inst->address;  // PC = JumpAddr
-        return regs;
+        *PC = inst->address;        // PC = JumpAddr
+        return;
     
     case JAL:
-        regs->ra = regs->PC + 0x8; // R[31] = PC + 8
-        regs->PC = inst->address;  // PC = JumpAddr
-        return regs;
+        regMemory[ra] = *PC + 0x8;  // R[31] = PC + 8
+        *PC = inst->address;        // PC = JumpAddr
+        return;
 
     default:
-        return regs;   
+        return;   
     }
 }

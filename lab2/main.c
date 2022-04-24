@@ -20,30 +20,29 @@
 #include "./stages/fetch.h"
 #include "./stages/decode.h"
 #include "./stages/execute.h"
-#include "./stages/handle_reg_mem.h"
 
 u_int32_t *MEMORY;
 INSTRUCT *inst;
-REGISTERS *regs;
+u_int32_t *PC;
 static u_int32_t regMemory[0x20] = {0x0, };
 
 int main(int argc, char *argv[]) {
+    // bring all binary codes from .o file
+    MEMORY = initProgram();
+    PC = initPC(); *PC = 0x0;
+
     regMemory[sp] = 0x1000000;
     regMemory[ra] = 0xFFFFFFFF;
 
-    // bring all binary codes from .o file
-    MEMORY = initProgram();
-    regs = initRegisters();
-
     // when PC points 0xFFFFFFFF, then terminate the program.
-    while (regs->PC < 0x200) { // memorysize
+    while (*PC < 0x200) { // memorysize
         inst = initInstruction();
 
-        inst = decode(inst, fetch(regs->PC, MEMORY));
+        inst = decode(inst, fetch(PC, MEMORY));
 
         showInstructorAfterDecode(inst);
 
-        regs = execute(inst, regs, regMemory);
+        execute(inst, regMemory, PC);
 
         // TO DO
         // execute(inst, regs, regMemory);
@@ -51,12 +50,15 @@ int main(int argc, char *argv[]) {
 
         // writeMemory(inst, regs);
         // writeRegister(inst, regs);
-        regs->PC = updatePC(inst, regs);
+        showCurrentStatus(regMemory);
+
+        *PC += 4;
 
         freeInstruction(inst);
     }
 
+    freePC(PC);
     freeMemory(MEMORY);
-    freeRegisters(regs);
+
     return 0;
 }

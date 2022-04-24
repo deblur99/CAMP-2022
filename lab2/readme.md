@@ -7,13 +7,17 @@ mips-linux-gnu-objdump -d <파일경로>
  - 가용 메모리가 충분치 않아 가급적 구동은 Assam 서버에서 하는 걸 추천
  - 현재는 메모리 크기를 0x10000로 잡았지만, 실제 제출용 코드에서는 0xFFFFFFFF로 잡아야 함
 
-# 이후 해야할 일 (제출마감 4/24 일요일. Freeday는 5일 있음)
-1) Decode
-2) Execute
-3) Write memory
-4) Write register
-5) Update PC
-6) 매 명령어 실행 끝날 때마다 레지스터의 현재 state, 사용한 명령어의 개수 등등 출력
+# 4/24 한 일
+- Decode 구현 완료, Execute 구현하기 앞서 코드 구조 개선
+- Execute R타입 ADD, JR / I타입 ADDI, ADDIU / J타입 J, JAL 구현 완료
+
+# 이후 해야할 일 (제출마감 4/24 일요일. Freeday는 5일 있음. 4/25 월요일 기준 Freeday 1일 소모중)
+1) Decode (완)
+2) Execute (진행중)
+3) Write memory (진행중)
+4) Write register (진행중)
+5) Update PC (진행중)
+6) 매 명령어 실행 끝날 때마다 레지스터의 현재 state, 사용한 명령어의 개수 등등 출력 (예정)
 
 # 레지스터 지정 및 레지스터에 저장된 값 관련
 - inst 구조체 (struct _INSTRUCT)

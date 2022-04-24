@@ -8,12 +8,12 @@
 
 u_int32_t* initProgram();
 
-INSTRUCT* initInstruction();
+u_int32_t* initPC();
 
-REGISTERS* initRegisters();
+INSTRUCT* initInstruction();
 
 void freeMemory(u_int32_t *memory);
 
-void freeInstruction(INSTRUCT *inst);
+void freePC(u_int32_t *PC);
 
-void freeRegisters(REGISTERS *registers);
+void freeInstruction(INSTRUCT *inst);

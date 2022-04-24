@@ -9,4 +9,4 @@
 
 u_int32_t convertFromBigEToLittleE(u_int32_t target);
 
-u_int32_t fetch(int PC, u_int32_t *MEMORY);
+u_int32_t fetch(u_int32_t *PC, u_int32_t *MEMORY);

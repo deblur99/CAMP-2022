@@ -22,6 +22,11 @@ u_int32_t* initProgram() {
     return MEMORY;
 }
 
+u_int32_t* initPC() {
+    u_int32_t *PC = (u_int32_t *)malloc(sizeof(u_int32_t));
+    return PC;
+}
+
 INSTRUCT* initInstruction() {
     INSTRUCT *inst = (INSTRUCT *)malloc(sizeof(INSTRUCT));
     memset(inst, 0, sizeof(INSTRUCT));
@@ -29,24 +34,15 @@ INSTRUCT* initInstruction() {
     return inst;
 }
 
-REGISTERS* initRegisters() {
-    REGISTERS *regs = (REGISTERS *)malloc(sizeof(REGISTERS));
-    memset(regs, 0, sizeof(REGISTERS));
-    regs->sp = 0x10000000;
-    regs->ra = 0xFFFFFFFF;
-
-    return regs;
-}
-
 // 초기화
 void freeMemory(u_int32_t *memory) {
     free(memory);
 }
 
-void freeInstruction(INSTRUCT *inst) {
-    free(inst);
+void freePC(u_int32_t *PC) {
+    free(PC);
 }
 
-void freeRegisters(REGISTERS *registers) {
-    free(registers);
+void freeInstruction(INSTRUCT *inst) {
+    free(inst);
 }

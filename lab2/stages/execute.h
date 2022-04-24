@@ -5,12 +5,11 @@
 #endif
 
 #include "../utils/defines.h"
-#include "handle_reg_mem.h"
 
-REGISTERS* execute(INSTRUCT *inst, REGISTERS *regs, u_int32_t regMemory[]);
+void execute(INSTRUCT *inst, u_int32_t regMemory[], u_int32_t *PC);
 
-REGISTERS* executeRType(INSTRUCT *inst, REGISTERS *regs, u_int32_t regMemory[]);
+void executeRType(INSTRUCT *inst, u_int32_t regMemory[], u_int32_t *PC);
 
-REGISTERS* executeIType(INSTRUCT *inst, REGISTERS *regs, u_int32_t regMemory[]);
+void executeIType(INSTRUCT *inst, u_int32_t regMemory[], u_int32_t *PC);
 
-REGISTERS* executeJType(INSTRUCT *inst, REGISTERS *regs);
+void executeJType(INSTRUCT *inst, u_int32_t regMemory[], u_int32_t *PC);

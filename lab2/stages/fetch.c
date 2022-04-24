@@ -19,10 +19,10 @@ u_int32_t convertFromBigEToLittleE(u_int32_t target) {
     return result;
 }
 
-u_int32_t fetch(int PC, u_int32_t *MEMORY) {
-    if (PC >= MEMORY_SIZE) {
+u_int32_t fetch(u_int32_t *PC, u_int32_t *MEMORY) {
+    if (*PC >= MEMORY_SIZE) {
         return -1;
     }
 
-    return convertFromBigEToLittleE(MEMORY[PC]);    
+    return convertFromBigEToLittleE(MEMORY[*PC]);    
 }
