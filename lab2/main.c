@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
 
         showInstructorAfterDecode(inst);
 
-        execute(inst, regMemory, PC);
+        //execute(inst, regMemory, PC);
 
         // TO DO
         // execute(inst, regs, regMemory);

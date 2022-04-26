@@ -6,7 +6,7 @@ u_int32_t* initProgram() {
     u_int32_t *MEMORY = (u_int32_t *)malloc(sizeof(u_int32_t) * MEMORY_SIZE);
     memset(MEMORY, -1, MEMORY_SIZE);
 
-    FILE *fp = fopen("/mnt/c/Users/32184893/CAMP-2022/lab2/test_prog/simple.o", "rb");
+    FILE *fp = fopen("/mnt/c/Users/deblu/CAMP/lab2/test_prog/simple.bin", "rb");
     if (fp == NULL) {
         perror("File Not Found");
         exit(1);
@@ -15,6 +15,11 @@ u_int32_t* initProgram() {
     int amount = 0; // amount of binary values in .o    
     while (!feof(fp)) {
         fread(&MEMORY[4 * amount++], sizeof(int), 1, fp);
+    }
+
+    // debug
+    for (int i = 0; i < amount; i++) {
+        printf("0x%08X\n", MEMORY[4 * i]);
     }
     
     fclose(fp);
