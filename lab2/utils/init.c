@@ -38,8 +38,8 @@ SCYCLE_HANDLER* initHandler() {
     return handler;
 }
 
-u_int32_t* initRegMemory() {
-    u_int32_t *regMemory = (u_int32_t *)malloc(sizeof(u_int32_t) * REG_MEMORY_SIZE);
+int32_t* initRegMemory() {
+    int32_t *regMemory = (int32_t *)malloc(sizeof(int32_t) * REG_MEMORY_SIZE);
     memset(regMemory, 0, sizeof(regMemory));
 
     return regMemory;

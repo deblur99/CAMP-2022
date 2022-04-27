@@ -20,6 +20,7 @@
 #include "./stages/fetch.h"
 #include "./stages/decode.h"
 #include "./stages/execute.h"
+#include "./stages/mem_access.h"
 
 u_int32_t *MEMORY;
 SCYCLE_HANDLER *handler;
@@ -43,7 +44,7 @@ int main(int argc, char *argv[]) {
 
     // Main tasks: all single cycles execution
     // when PC points 0xFFFFFFFF, then terminate the program.
-    while (handler->PC->currPC <= 0x40) { // MEMORY_SIZE is set temporarily 0x40
+    while (handler->PC->currPC <= MEMORY_SIZE) {
         handler->PC->prevPC = handler->PC->currPC;
         handler->inst = initInstruction();
 
@@ -58,8 +59,10 @@ int main(int argc, char *argv[]) {
 
         showInstructorAfterDecode(handler->inst);
 
-        handler = execute(handler);
+        handler = execute(handler, MEMORY);
 
+        MEMORY = writeIntoMemory(MEMORY, handler);
+        
         handler->PC->currPC += 4; // to be writeback function
         showStatusAfterExecInst(handler);
 

@@ -9,8 +9,8 @@
 #include <string.h>
 #include <sys/types.h>
 
-#define MEMORY_SIZE     0x1000 // original size is 0xFFFFFFFF
-#define REG_MEMORY_SIZE 0x20   // values in each $0~$31 registers
+#define MEMORY_SIZE     0xFFFFFFFF // original size is 0xFFFFFFFF
+#define REG_MEMORY_SIZE 0x20       // values in each $0~$31 registers
 
 #define OPCODE_MASK     0x000000FF
 
@@ -22,6 +22,8 @@
 #define RTYPE           0x0
 
 // R type funct
+#define MOVE            0x21
+
 #define ADD             0x20 
 #define ADDU            0x21
 #define AND             0x24
@@ -31,7 +33,7 @@
 #define SLT             0x2A
 #define SLTU            0x2B
 #define SLL             0x00
-#define SLR             0x02
+#define SRL             0x02
 #define SUB             0x22
 #define SUBU            0x23
 #define DIV             0x1A
@@ -44,6 +46,8 @@
 #define SRA             0x3
 
 // I type opcode
+#define LI              0x24
+
 #define ADDI            0x8
 #define ADDIU           0x9
 #define ANDI            0xC
@@ -152,7 +156,7 @@ typedef struct _COUNTER {
 }COUNTER;
 
 typedef struct _SCYCLE_HANDLER {
-    u_int32_t *regMemory;
+    int32_t *regMemory;
     PC *PC;
     INSTRUCT *inst;
     COUNTER *counter;

@@ -10,7 +10,7 @@ u_int32_t* initMainMemory();
 
 SCYCLE_HANDLER* initHandler();
 
-u_int32_t* initRegMemory();
+int32_t* initRegMemory();
 
 PC* initPC();
 
