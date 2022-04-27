@@ -22,43 +22,58 @@
 #include "./stages/execute.h"
 
 u_int32_t *MEMORY;
-INSTRUCT *inst;
-u_int32_t *PC;
-static u_int32_t regMemory[0x20] = {0x0, };
+SCYCLE_HANDLER *handler;
 
 int main(int argc, char *argv[]) {
-    // bring all binary codes from .o file
-    MEMORY = initProgram();
-    PC = initPC(); *PC = 0x0;
+    // memory allocation
+    MEMORY = initMainMemory(); // bring all binary codes from .o file
+    handler = initHandler();
 
-    regMemory[sp] = 0x1000000;
-    regMemory[ra] = 0xFFFFFFFF;
+    handler->regMemory = initRegMemory();
+    handler->regMemory[sp] = 0x1000000;
+    handler->regMemory[ra] = 0xFFFFFFFF;
 
+    handler->PC = initPC();
+    handler->PC->prevPC = 0x00000000;
+    handler->PC->currPC = 0x00000000;
+
+    handler->inst = initInstruction();
+
+    handler->counter = initCounter();
+
+    // Main tasks: all single cycles execution
     // when PC points 0xFFFFFFFF, then terminate the program.
-    while (*PC < 0x200) { // memorysize
-        inst = initInstruction();
+    while (handler->PC->currPC <= 0x40) { // MEMORY_SIZE is set temporarily 0x40
+        handler->PC->prevPC = handler->PC->currPC;
+        handler->inst = initInstruction();
 
-        inst = decode(inst, fetch(PC, MEMORY));
+        handler->inst = decode(handler->inst, fetch(handler->PC->currPC, MEMORY));
 
-        showInstructorAfterDecode(inst);
+        // check inst is nop. if inst is nop, then update PC and pass this instruction.
+        if (isEmptyInst(handler->inst)) {
+            handler->PC->currPC += 4; // to be writeback function
+            freeInstruction(handler->inst);
+            continue;
+        }
 
-        //execute(inst, regMemory, PC);
+        showInstructorAfterDecode(handler->inst);
 
-        // TO DO
-        // execute(inst, regs, regMemory);
-        
+        handler = execute(handler);
 
-        // writeMemory(inst, regs);
-        // writeRegister(inst, regs);
-        showCurrentStatus(regMemory);
+        handler->PC->currPC += 4; // to be writeback function
+        showStatusAfterExecInst(handler);
 
-        *PC += 4;
-
-        freeInstruction(inst);
+        freeInstruction(handler->inst);
     }
 
-    freePC(PC);
-    freeMemory(MEMORY);
+    showCounterAfterExecProgram(handler->counter); // print after all executions
+
+    // free allocated memory
+    freeCounter(handler->counter);
+    freePC(handler->PC);
+    freeRegMemory(handler->regMemory);
+    freeHandler(handler);
+    freeMainMemory(MEMORY);
 
     return 0;
 }

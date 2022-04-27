@@ -1,6 +1,11 @@
 #include "decode.h"
 
 INSTRUCT* decode(INSTRUCT *inst, u_int32_t target) {
+    // check target is 0x00000000 (empty)
+    if (target == EMPTY) {
+        return inst;
+    }
+
     // opcode
     inst->opcode = target >> 26;
     target = target << 6 >> 6; // strip opcode

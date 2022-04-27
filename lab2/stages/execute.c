@@ -1,74 +1,83 @@
 #include "execute.h"
 
-void execute(INSTRUCT *inst, u_int32_t regMemory[], u_int32_t *PC) {
-    switch (inst->optype[0]) {
+SCYCLE_HANDLER* execute(SCYCLE_HANDLER *handler) {
+    handler->counter->executedInst++;
+
+    switch (handler->inst->optype[0]) {
     case 'R':
-        return executeRType(inst, regMemory, PC);
+        handler = executeRType(handler);
+        break;
     
     case 'I':
-        return executeIType(inst, regMemory, PC);
+        handler = executeIType(handler);
+        break;
 
     case 'J':
-        return executeJType(inst, regMemory, PC);
+        handler = executeJType(handler);
+        break;
+    }
 
-    default:
-        return;
-    }   
+    handler->counter->returnValue = handler->regMemory[v0]; // update v0
+    handler->counter->cycle++;                              // cycle number increment
+
+    return handler;
 }
 
-void executeRType(INSTRUCT *inst, u_int32_t regMemory[], u_int32_t *PC) {
-    if (inst->opcode != RTYPE &&
-        inst->opcode != MFC0) {
-            return;
-        }
+SCYCLE_HANDLER* executeRType(SCYCLE_HANDLER *handler) {
+    handler->counter->executedRTypeInst++;
 
-    if (inst->opcode == RTYPE) {
-        switch (inst->funct) {
+    if (handler->inst->opcode == RTYPE) {
+        switch (handler->inst->funct) {
         case ADD:
         // R[rd] = R[rs] + R[rt]
-            *(regMemory + inst->rd) = *(regMemory + inst->rs) + *(regMemory + inst->rt); 
-            return;
+            handler->regMemory[handler->inst->rd] = handler->regMemory[handler->inst->rs] + handler->regMemory[handler->inst->rt]; 
+            break;
 
         case JR:
         // PC = R[rs]
-            *PC = *(regMemory + inst->rs);  
-            return;
-
-        default:
-            return;
+            handler->PC->prevPC = handler->PC->currPC;
+            handler->PC->currPC = handler->regMemory[handler->inst->rs];  
+            break;
         }
     }
+
+    return handler;
 }
 
-void executeIType(INSTRUCT *inst, u_int32_t regMemory[], u_int32_t *PC) {
-    switch (inst->opcode) {
+SCYCLE_HANDLER* executeIType(SCYCLE_HANDLER *handler) {
+    handler->counter->executedITypeInst++;
+
+    switch (handler->inst->opcode) {
     case ADDI:
     // rs가 가리키는 레지스터에 저장되어 있는 값 가져온다.
     // ex) rs가 0x11를 가리키면 0 + 0x11번째, 즉 17번째 레지스터에 저장된 값을 가져온다.
-        *(regMemory + inst->rt) = *(regMemory + inst->rs) + (u_int32_t)inst->immed;    // R[rt] = R[rs] + SignExtImm
-        return;
+        handler->regMemory[handler->inst->rt] = handler->regMemory[handler->inst->rs] + (int32_t)(handler->inst->immed);    // R[rt] = R[rs] + SignExtImm
+        break;
 
     case ADDIU:
-        *(regMemory + inst->rt) = *(regMemory + inst->rs) + (u_int32_t)inst->immed;    // R[rt] = R[rs] + SignExtImm
-        return;
-    
-    default:
-        return;
+        handler->regMemory[handler->inst->rt] = handler->regMemory[handler->inst->rs] + (u_int32_t)(handler->inst->immed);    // R[rt] = R[rs] + SignExtImm
+        break;
     }
+    
+    return handler;
 }
 
-void executeJType(INSTRUCT *inst, u_int32_t regMemory[], u_int32_t *PC) {
-    switch (inst->opcode) {
+SCYCLE_HANDLER* executeJType(SCYCLE_HANDLER *handler) {
+    handler->counter->executedJTypeInst++;
+
+    switch (handler->inst->opcode) {
     case J:
-        *PC = inst->address;        // PC = JumpAddr
-        return;
+        handler->PC->prevPC = handler->PC->currPC;
+        handler->PC->currPC = handler->inst->address;        // PC = JumpAddr
+        break;
     
     case JAL:
-        regMemory[ra] = *PC + 0x8;  // R[31] = PC + 8
-        *PC = inst->address;        // PC = JumpAddr
-        return;
+        handler->regMemory[ra] = handler->PC->currPC + 0x8;  // R[31] = PC + 8
 
-    default:
-        return;   
+        handler->PC->prevPC = handler->PC->currPC;
+        handler->PC->currPC = handler->inst->address;        // PC = JumpAddr
+        break;
     }
+
+    return handler;
 }

@@ -8,6 +8,8 @@
         "tasks.h": "c",
         "show.h": "c",
         "handle_reg.h": "c",
-        "fetch.h": "c"
+        "fetch.h": "c",
+        "decode.h": "c",
+        "init.h": "c"
     }
 }

@@ -10,10 +10,14 @@
 #include <sys/types.h>
 
 #define MEMORY_SIZE     0x1000 // original size is 0xFFFFFFFF
+#define REG_MEMORY_SIZE 0x20   // values in each $0~$31 registers
 
 #define OPCODE_MASK     0x000000FF
 
 // opcode list (from MIPS Green Sheet)
+// nop
+#define EMPTY           0x00000000
+
 // R type OPCODE is 0 (except MFC0. its opcode is 0x10)
 #define RTYPE           0x0
 
@@ -68,30 +72,6 @@
 
 // FI, FR are skipped
 
-// structures
-typedef struct _INSTRUCT {
-    char optype[2];
-    u_int32_t opcode;      // for R, I, J type
-
-    u_int32_t rs;          // for R, I type          
-    u_int32_t rt;          // for R, I type
-    u_int32_t rd;          // for R type
-
-    u_int32_t shmat;       // for R type
-    u_int32_t funct;       // for R type
-
-    int16_t immed;       // for I type
-    
-    u_int32_t address;     // for J type
-
-    int32_t signExtImm;  // for I type (addi, addiu, lbu, lhu, lw, slti, sltiu, sb, sc, sh, sw, lwcu, ldcl, swcl, sdcl)
-    int32_t zeroExtImm;  // for I type (andi, ori)
-
-    u_int32_t branchAddr;  // for Branch (beq, bne)
-    u_int32_t jumpAddr;    // for Jump (j, jal)
-
-}INSTRUCT;
-
 // register list ($0 ~ $31, 0x00 ~ 0x1F)
 typedef enum _REG_LIST {
     zero = 0x0,                   // always zero ($0)
@@ -121,3 +101,59 @@ typedef enum _REG_LIST {
     ra = 0x1F,                      // return address ($31). 0x1F
 
 }REG_LIST;
+
+// Handlers : REG_MEMORY, PC, INSTRUCT, COUNTER
+
+// PCs
+typedef struct _PC {
+    u_int32_t prevPC;
+    u_int32_t currPC;
+
+}PC;
+
+// structures
+typedef struct _INSTRUCT {
+    char optype[2];
+    u_int32_t opcode;      // for R, I, J type
+
+    u_int32_t rs;          // for R, I type          
+    u_int32_t rt;          // for R, I type
+    u_int32_t rd;          // for R type
+
+    u_int32_t shmat;       // for R type
+    u_int32_t funct;       // for R type
+
+    int16_t immed;       // for I type
+    
+    u_int32_t address;     // for J type
+
+    int32_t signExtImm;  // for I type (addi, addiu, lbu, lhu, lw, slti, sltiu, sb, sc, sh, sw, lwcu, ldcl, swcl, sdcl)
+    int32_t zeroExtImm;  // for I type (andi, ori)
+
+    u_int32_t branchAddr;  // for Branch (beq, bne)
+    u_int32_t jumpAddr;    // for Jump (j, jal)
+
+}INSTRUCT;
+
+// for counting instructions, branches
+typedef struct _COUNTER {
+    u_int32_t cycle;
+
+    int32_t returnValue;
+    
+    u_int32_t executedInst;
+    u_int32_t executedRTypeInst;
+    u_int32_t executedITypeInst;
+    u_int32_t executedJTypeInst;
+    u_int32_t memoryAccessInst;
+
+    u_int32_t takenBranches;
+
+}COUNTER;
+
+typedef struct _SCYCLE_HANDLER {
+    u_int32_t *regMemory;
+    PC *PC;
+    INSTRUCT *inst;
+    COUNTER *counter;
+}SCYCLE_HANDLER;

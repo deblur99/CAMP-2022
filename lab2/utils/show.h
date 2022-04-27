@@ -6,6 +6,10 @@
 
 #include "defines.h"
 
+int isEmptyInst(INSTRUCT *inst);
+
 void showInstructorAfterDecode(INSTRUCT *inst);
 
-void showCurrentStatus(u_int32_t regMemory[]);
+void showStatusAfterExecInst(SCYCLE_HANDLER *handler);
+
+void showCounterAfterExecProgram(COUNTER *counter);

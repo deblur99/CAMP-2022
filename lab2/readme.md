@@ -30,3 +30,10 @@ mips-linux-gnu-objdump -d <파일경로>
 
 - regs 구조체 (struct _REGISTERS)
     - PC (Program Counter)와 32가지 레지스터 ($0 ~ $31)의 정보를 가리키는 구조체
+
+# 4/27
+호출된 함수에서 값을 반환하지 않으면 업데이트가 되지 않음
+-> 구조체 중심으로 레지스터 저장값 나타내는 regMemory 배열, 명령어 정보 나타내는 INSTRUCT 구조체, Single Cycle 결과값 나타내는 COUNTER 구조체를 SCYCLE_INFO 구조체로 통합
+-> 함수에 넘기고 업데이트한 구조체를 다시 반환하고, 이를 l-value에 위치한 구조체 변수에 다시 저장한다.
+
+* 구조체 할당해주고 -> 구조체 멤버 할당해주고 -> 할당된 구조체 멤버 접근해서 초기화해주고

@@ -6,10 +6,10 @@
 
 #include "../utils/defines.h"
 
-void execute(INSTRUCT *inst, u_int32_t regMemory[], u_int32_t *PC);
+SCYCLE_HANDLER* execute(SCYCLE_HANDLER *handler);
 
-void executeRType(INSTRUCT *inst, u_int32_t regMemory[], u_int32_t *PC);
+SCYCLE_HANDLER* executeRType(SCYCLE_HANDLER *handler);
 
-void executeIType(INSTRUCT *inst, u_int32_t regMemory[], u_int32_t *PC);
+SCYCLE_HANDLER* executeIType(SCYCLE_HANDLER *handler);
 
-void executeJType(INSTRUCT *inst, u_int32_t regMemory[], u_int32_t *PC);
+SCYCLE_HANDLER* executeJType(SCYCLE_HANDLER *handler);
