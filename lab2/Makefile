@@ -1,13 +1,16 @@
 CC = gcc
 
-main : main.o init.o show.o fetch.o decode.o execute.o mem_access.o
-	gcc -o main main.o init.o show.o fetch.o decode.o execute.o mem_access.o
+main : main.o init.o assess.o show.o fetch.o decode.o execute.o mem_access.o
+	gcc -o main main.o init.o assess.o show.o fetch.o decode.o execute.o mem_access.o
 
 main.o : main.c
 	gcc -c main.c
 
 init.o : ./utils/init.c
 	gcc -c ./utils/init.c
+
+assess.o : ./utils/assess.c
+	gcc -c ./utils/assess.c
 
 show.o : ./utils/show.c
 	gcc -c ./utils/show.c

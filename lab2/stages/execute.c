@@ -1,8 +1,6 @@
 #include "execute.h"
 
 SCYCLE_HANDLER* execute(SCYCLE_HANDLER *handler, u_int32_t *MEMORY) {
-    handler->counter->executedInst++;
-
     switch (handler->inst->optype[0]) {
     case 'R':
         handler = executeRType(handler);
@@ -17,15 +15,10 @@ SCYCLE_HANDLER* execute(SCYCLE_HANDLER *handler, u_int32_t *MEMORY) {
         break;
     }
 
-    handler->counter->returnValue = handler->regMemory[v0]; // update v0
-    handler->counter->cycle++;                              // cycle number increment
-
     return handler;
 }
 
 SCYCLE_HANDLER* executeRType(SCYCLE_HANDLER *handler) {
-    handler->counter->executedRTypeInst++;
-
     if (handler->inst->opcode == RTYPE) {
         switch (handler->inst->funct) {
         case MOVE:
@@ -137,8 +130,6 @@ SCYCLE_HANDLER* executeRType(SCYCLE_HANDLER *handler) {
 }
 
 SCYCLE_HANDLER* executeIType(SCYCLE_HANDLER *handler, u_int32_t *MEMORY) {
-    handler->counter->executedITypeInst++;
-
     switch (handler->inst->opcode) {
     // R[rt] = immed
     case LI:
@@ -214,8 +205,6 @@ SCYCLE_HANDLER* executeIType(SCYCLE_HANDLER *handler, u_int32_t *MEMORY) {
 }
 
 SCYCLE_HANDLER* executeJType(SCYCLE_HANDLER *handler) {
-    handler->counter->executedJTypeInst++;
-
     switch (handler->inst->opcode) {
     case J:
         handler->PC->prevPC = handler->PC->currPC;

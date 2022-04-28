@@ -12,4 +12,4 @@ void showInstructorAfterDecode(INSTRUCT *inst);
 
 void showStatusAfterExecInst(SCYCLE_HANDLER *handler);
 
-void showCounterAfterExecProgram(COUNTER *counter);
+void showCounterAfterExecProgram(SCYCLE_HANDLER *handler);

@@ -141,10 +141,8 @@ typedef struct _INSTRUCT {
 
 // for counting instructions, branches
 typedef struct _COUNTER {
-    u_int32_t cycle;
-
     int32_t returnValue;
-    
+
     u_int32_t executedInst;
     u_int32_t executedRTypeInst;
     u_int32_t executedITypeInst;
@@ -160,4 +158,5 @@ typedef struct _SCYCLE_HANDLER {
     PC *PC;
     INSTRUCT *inst;
     COUNTER *counter;
+
 }SCYCLE_HANDLER;

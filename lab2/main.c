@@ -16,6 +16,7 @@
 
 #include "./utils/defines.h"
 #include "./utils/init.h"
+#include "./utils/assess.h"
 #include "./utils/show.h"
 #include "./stages/fetch.h"
 #include "./stages/decode.h"
@@ -44,7 +45,7 @@ int main(int argc, char *argv[]) {
 
     // Main tasks: all single cycles execution
     // when PC points 0xFFFFFFFF, then terminate the program.
-    while (handler->PC->currPC <= MEMORY_SIZE) {
+    while (handler->PC->currPC < MEMORY_SIZE) {
         handler->PC->prevPC = handler->PC->currPC;
         handler->inst = initInstruction();
 
@@ -63,13 +64,20 @@ int main(int argc, char *argv[]) {
 
         MEMORY = writeIntoMemory(MEMORY, handler);
         
-        handler->PC->currPC += 4; // to be writeback function
+        if (handler->inst->optype[0] != 'J')
+            handler->PC->currPC += 4; // to be writeback function
         showStatusAfterExecInst(handler);
+
+        handler = updateCounter(handler);
+
+        // if (!isValidInst(handler->PC->currPC)) {
+        //     break;
+        // }
 
         freeInstruction(handler->inst);
     }
 
-    showCounterAfterExecProgram(handler->counter); // print after all executions
+    showCounterAfterExecProgram(handler); // print after all executions
 
     // free allocated memory
     freeCounter(handler->counter);
