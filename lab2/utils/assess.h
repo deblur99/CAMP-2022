@@ -7,5 +7,3 @@
 #include "defines.h"
 
 SCYCLE_HANDLER* updateCounter(SCYCLE_HANDLER *handler);
-
-int isValidInst(u_int32_t pc);

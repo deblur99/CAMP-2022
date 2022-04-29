@@ -6,4 +6,4 @@
 
 #include "../utils/defines.h"
 
-u_int32_t* writeIntoMemory(u_int32_t *MEMORY, SCYCLE_HANDLER *handler);
+MAIN_MEMORY* writeIntoMemory(MAIN_MEMORY *mainMemory, SCYCLE_HANDLER *handler);

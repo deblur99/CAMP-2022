@@ -9,7 +9,7 @@
 #include <string.h>
 #include <sys/types.h>
 
-#define MEMORY_SIZE     0x10000 // original size is 0xFFFFFFFF
+#define MEMORY_SIZE     0x10000000 // original size is 0xFFFFFFFF
 #define REG_MEMORY_SIZE 0x20       // values in each $0~$31 registers
 
 #define OPCODE_MASK     0x000000FF
@@ -106,8 +106,12 @@ typedef enum _REG_LIST {
 
 }REG_LIST;
 
-// Handlers : REG_MEMORY, PC, INSTRUCT, COUNTER
+typedef struct _MAIN_MEMORY {
+    u_int32_t endPoint;
+    u_int32_t MEMORY[MEMORY_SIZE];
+}MAIN_MEMORY;
 
+// Handling structures : REG_MEMORY, PC, INSTRUCT, COUNTER
 // PCs
 typedef struct _PC {
     u_int32_t prevPC;

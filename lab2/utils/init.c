@@ -2,19 +2,19 @@
 #include "init.h"
 
 // 할당
-u_int32_t* initMainMemory() {
-    u_int32_t *MEMORY = (u_int32_t *)malloc(sizeof(u_int32_t) * MEMORY_SIZE);
-    memset(MEMORY, 0, MEMORY_SIZE);
+MAIN_MEMORY* initMainMemory() {
+    MAIN_MEMORY *mainMemory = (MAIN_MEMORY *)malloc(sizeof(MAIN_MEMORY));
+    memset(mainMemory, 0x0, sizeof(MAIN_MEMORY));
 
-    FILE *fp = fopen("/mnt/c/Users/32184893/CAMP-2022/lab2/test_prog/simple.bin", "rb");
+    FILE *fp = fopen("/mnt/c/Users/32184893/CAMP-2022/lab2/test_prog/input4.bin", "rb");
     if (fp == NULL) {
         perror("File Not Found");
         exit(1);
     }
 
     int amount = 0; // amount of binary values in .o    
-    while (!feof(fp)) {
-        fread(&MEMORY[4 * amount++], sizeof(int), 1, fp);
+    while (fread(&mainMemory->MEMORY[4 * amount++], 1, sizeof(int), fp) == 4) {
+        ;
     }
 
     printf("=========================\n");
@@ -22,13 +22,15 @@ u_int32_t* initMainMemory() {
     printf("=========================\n");
     // print all loaded data from MEMORY array
     for (int i = 0; i < amount; i++) {
-        printf("0x%X: 0x%08X\n", 4 * i, MEMORY[4 * i]);
+        printf("0x%X: 0x%08X\n", 4 * i, mainMemory->MEMORY[4 * i]);
     }
     printf("=========================\n");
     
     fclose(fp);
 
-    return MEMORY;
+    mainMemory->endPoint = amount;
+
+    return mainMemory;
 }
 
 SCYCLE_HANDLER* initHandler() {
@@ -40,7 +42,7 @@ SCYCLE_HANDLER* initHandler() {
 
 int32_t* initRegMemory() {
     int32_t *regMemory = (int32_t *)malloc(sizeof(int32_t) * REG_MEMORY_SIZE);
-    memset(regMemory, 0, sizeof(regMemory));
+    memset(regMemory, 0, REG_MEMORY_SIZE);
 
     return regMemory;
 }
@@ -65,7 +67,7 @@ COUNTER* initCounter() {
 }
 
 // 메모리 해제
-void freeMainMemory(u_int32_t *memory) {
+void freeMainMemory(MAIN_MEMORY *memory) {
     free(memory);
 }
 

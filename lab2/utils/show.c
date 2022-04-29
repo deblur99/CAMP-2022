@@ -33,6 +33,7 @@ void showInstructorAfterDecode(INSTRUCT *inst) {
         printf(", address: 0x%X\n", inst->address);
 
     default:
+        printf("\n");
         break;
     }
 }
@@ -85,7 +86,7 @@ void showCounterAfterExecProgram(SCYCLE_HANDLER *handler) {
 
     printf("All instructions in the program have been executed.\n");
     printf("======================================================\n");
-    printf("1) Final return value ($2) : 0x%08X\n", handler->regMemory[v0]);
+    printf("1) Final return value ($2) : 0x%X\n", handler->regMemory[v0]);
     printf("2) Number of executed instructions (Total cycles) : %d\n", handler->counter->executedInst);
     printf("3) Number of executed R-type instruction : %d\n", handler->counter->executedRTypeInst);
     printf("4) Number of executed I-type instruction : %d\n", handler->counter->executedITypeInst);

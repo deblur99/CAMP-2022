@@ -23,12 +23,12 @@
 #include "./stages/execute.h"
 #include "./stages/mem_access.h"
 
-u_int32_t *MEMORY;
-SCYCLE_HANDLER *handler;
+MAIN_MEMORY *mainMemory = NULL;
+SCYCLE_HANDLER *handler = NULL;
 
 int main(int argc, char *argv[]) {
     // memory allocation
-    MEMORY = initMainMemory(); // bring all binary codes from .o file
+    mainMemory = initMainMemory(); // bring all binary codes from .o file
     handler = initHandler();
 
     handler->regMemory = initRegMemory();
@@ -45,35 +45,26 @@ int main(int argc, char *argv[]) {
 
     // Main tasks: all single cycles execution
     // when PC points 0xFFFFFFFF, then terminate the program.
-    while (handler->PC->currPC < MEMORY_SIZE) {
+    while (handler->PC->currPC < MEMORY_SIZE &&
+            handler->PC->currPC < 4 * mainMemory->endPoint) {
+                
         handler->PC->prevPC = handler->PC->currPC;
         handler->inst = initInstruction();
 
         showInstructorAfterFetch(handler);
 
-        handler->inst = decode(handler->inst, fetch(handler->PC->currPC, MEMORY));
-
-        // check inst is nop. if inst is nop, then update PC and pass this instruction.
-        if (isEmptyInst(handler->inst)) {
-            handler->PC->currPC += 4; // to be writeback function
-            freeInstruction(handler->inst);
-            continue;
-        }
+        handler->inst = decode(handler->inst, fetch(handler->PC->currPC, mainMemory));
 
         showInstructorAfterDecode(handler->inst);
 
-        handler = execute(handler, MEMORY);
+        handler = execute(handler, mainMemory);
 
-        MEMORY = writeIntoMemory(MEMORY, handler);
+        mainMemory = writeIntoMemory(mainMemory, handler);
         
         if (handler->inst->optype[0] != 'J')
             handler->PC->currPC += 4; // to be writeback function
         showStatusAfterExecInst(handler);
         handler = updateCounter(handler);
-
-        // if (!isValidInst(handler->PC->currPC)) {
-        //     break;
-        // }
 
         freeInstruction(handler->inst);
     }
@@ -85,7 +76,7 @@ int main(int argc, char *argv[]) {
     freePC(handler->PC);
     freeRegMemory(handler->regMemory);
     freeHandler(handler);
-    freeMainMemory(MEMORY);
+    freeMainMemory(mainMemory);
 
     return 0;
 }

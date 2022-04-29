@@ -6,7 +6,7 @@
 
 #include "defines.h"
 
-u_int32_t* initMainMemory();
+MAIN_MEMORY* initMainMemory();
 
 SCYCLE_HANDLER* initHandler();
 
@@ -18,7 +18,7 @@ INSTRUCT* initInstruction();
 
 COUNTER* initCounter();
 
-void freeMainMemory(u_int32_t *memory);
+void freeMainMemory(MAIN_MEMORY *memory);
 
 void freeHandler(SCYCLE_HANDLER *handler);
 

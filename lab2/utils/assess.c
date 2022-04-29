@@ -35,7 +35,3 @@ SCYCLE_HANDLER* updateCounter(SCYCLE_HANDLER *handler) {
 
     return handler;   
 }
-
-int isValidInst(u_int32_t pc) {
-    return pc % 4 == 0;
-}

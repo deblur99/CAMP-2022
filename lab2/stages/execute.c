@@ -1,13 +1,13 @@
 #include "execute.h"
 
-SCYCLE_HANDLER* execute(SCYCLE_HANDLER *handler, u_int32_t *MEMORY) {
+SCYCLE_HANDLER* execute(SCYCLE_HANDLER *handler, MAIN_MEMORY *mainMemory) {
     switch (handler->inst->optype[0]) {
     case 'R':
         handler = executeRType(handler);
         break;
     
     case 'I':
-        handler = executeIType(handler, MEMORY);
+        handler = executeIType(handler, mainMemory);
         break;
 
     case 'J':
@@ -129,7 +129,7 @@ SCYCLE_HANDLER* executeRType(SCYCLE_HANDLER *handler) {
     return handler;
 }
 
-SCYCLE_HANDLER* executeIType(SCYCLE_HANDLER *handler, u_int32_t *MEMORY) {
+SCYCLE_HANDLER* executeIType(SCYCLE_HANDLER *handler, MAIN_MEMORY *mainMemory) {
     switch (handler->inst->opcode) {
     // R[rt] = immed
     case LI:
@@ -140,7 +140,7 @@ SCYCLE_HANDLER* executeIType(SCYCLE_HANDLER *handler, u_int32_t *MEMORY) {
     case LW:
     // R[rt] = M[R[rs]+SignExtImm]
         handler->regMemory[handler->inst->rt] = 
-            MEMORY[handler->regMemory[handler->inst->rs] 
+            mainMemory->MEMORY[handler->regMemory[handler->inst->rs] 
                 + handler->inst->signExtImm];
         break;
 
