@@ -8,6 +8,8 @@
 
 int isEmptyInst(INSTRUCT *inst);
 
+void showInstructorAfterFetch(SCYCLE_HANDLER *handler);
+
 void showInstructorAfterDecode(INSTRUCT *inst);
 
 void showStatusAfterExecInst(SCYCLE_HANDLER *handler);

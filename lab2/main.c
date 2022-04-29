@@ -49,6 +49,8 @@ int main(int argc, char *argv[]) {
         handler->PC->prevPC = handler->PC->currPC;
         handler->inst = initInstruction();
 
+        showInstructorAfterFetch(handler);
+
         handler->inst = decode(handler->inst, fetch(handler->PC->currPC, MEMORY));
 
         // check inst is nop. if inst is nop, then update PC and pass this instruction.
@@ -67,7 +69,6 @@ int main(int argc, char *argv[]) {
         if (handler->inst->optype[0] != 'J')
             handler->PC->currPC += 4; // to be writeback function
         showStatusAfterExecInst(handler);
-
         handler = updateCounter(handler);
 
         // if (!isValidInst(handler->PC->currPC)) {

@@ -6,7 +6,7 @@ u_int32_t* initMainMemory() {
     u_int32_t *MEMORY = (u_int32_t *)malloc(sizeof(u_int32_t) * MEMORY_SIZE);
     memset(MEMORY, 0, MEMORY_SIZE);
 
-    FILE *fp = fopen("/home/hyeonmin18/CAMP-2022/lab2/test_prog/input4.bin", "rb");
+    FILE *fp = fopen("/mnt/c/Users/32184893/CAMP-2022/lab2/test_prog/simple.bin", "rb");
     if (fp == NULL) {
         perror("File Not Found");
         exit(1);
@@ -24,7 +24,7 @@ u_int32_t* initMainMemory() {
     for (int i = 0; i < amount; i++) {
         printf("0x%X: 0x%08X\n", 4 * i, MEMORY[4 * i]);
     }
-    printf("=========================\n\n");
+    printf("=========================\n");
     
     fclose(fp);
 
