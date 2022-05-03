@@ -37,3 +37,43 @@ mips-linux-gnu-objdump -d <파일경로>
 -> 함수에 넘기고 업데이트한 구조체를 다시 반환하고, 이를 l-value에 위치한 구조체 변수에 다시 저장한다.
 
 * 구조체 할당해주고 -> 구조체 멤버 할당해주고 -> 할당된 구조체 멤버 접근해서 초기화해주고
+
+# 구현된 / 구현해야 할 명령어 목록
+* 메모리 접근하는 명령어는 LW, SW밖에 없고, 모두 I Type이다.
+
+* R Type
+- MOVE (ADDU와 겹침)
+- ADD
+- SUB
+- SUBU
+- MULT
+- MULTU
+- DIV
+- DIVU
+
+- AND
+- NOR
+- OR
+
+- SLT
+- SLTU
+- SLL
+- SRL
+- JR
+
+* I Type
+- LI
+- LW
+- SW
+- SLTI
+- SLTIU
+- ADDI
+- ADDIU
+- ANDI
+- ORI
+- BEQ
+- BNE
+
+* J Type
+- J
+- JAL
