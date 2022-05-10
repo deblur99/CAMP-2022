@@ -1,12 +1,17 @@
-// 초기화 및 메모리 해제 함수 정의
 #include "init.h"
 
-// 할당
+// allocate and initialize
 MAIN_MEMORY* initMainMemory() {
     MAIN_MEMORY *mainMemory = (MAIN_MEMORY *)malloc(sizeof(MAIN_MEMORY));
     memset(mainMemory, 0x0, sizeof(MAIN_MEMORY));
 
-    FILE *fp = fopen("/mnt/c/Users/32184893/CAMP-2022/lab2/test_prog/input4.bin", "rb");
+    mainMemory->endPoint = 0;
+
+    mainMemory->MEMORY = (u_int32_t *)malloc(MEMORY_SIZE);
+    memset(mainMemory->MEMORY, 0x0, sizeof(MEMORY_SIZE));
+
+    // first arg -> "absolute" file path
+    FILE *fp = fopen("/mnt/c/Users/32184893/CAMP-2022/lab2/test_prog/simple.bin", "rb");
     if (fp == NULL) {
         perror("File Not Found");
         exit(1);
@@ -66,8 +71,9 @@ COUNTER* initCounter() {
     return counter;
 }
 
-// 메모리 해제
+// free memory
 void freeMainMemory(MAIN_MEMORY *memory) {
+    free(memory->MEMORY);
     free(memory);
 }
 

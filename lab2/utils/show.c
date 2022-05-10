@@ -38,13 +38,7 @@ void showInstructorAfterDecode(INSTRUCT *inst) {
     }
 }
 
-void showStatusAfterExecInst(SCYCLE_HANDLER *handler) {
-    // TO DO : print status of registers by the below notes
-    /*
-    A. For each instruction execution,
-        i. Changed architectural state
-    */
-      
+void showStatusAfterExecInst(SCYCLE_HANDLER *handler) {      
     printf("[Execute] ");
         
     switch (handler->inst->optype[0]) {
@@ -70,18 +64,6 @@ void showStatusAfterExecInst(SCYCLE_HANDLER *handler) {
 }
 
 void showCounterAfterExecProgram(SCYCLE_HANDLER *handler) {
-    // TO DO : print status of registers by the below notes
-    /*
-    B. After the completion of the program
-        i. Final return value (value in r2) – up to here, basic requirement
-        ii. Number of executed instructions
-        iii. Number of (executed) R-type instruction
-        iv. Number of I-type instruction
-        v. Number of J-type instruction
-        vi. Number of memory access instructions -> LW, SW
-        vii. Number of taken branches -> BNE, BEQ
-    */
-
     printf("\n******************************************************\n");
 
     printf("All instructions in the program have been executed.\n");

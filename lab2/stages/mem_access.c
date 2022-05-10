@@ -10,3 +10,4 @@ MAIN_MEMORY* writeIntoMemory(MAIN_MEMORY *mainMemory, SCYCLE_HANDLER *handler) {
 
     return mainMemory;    
 }
+

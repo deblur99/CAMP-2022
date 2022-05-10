@@ -108,7 +108,7 @@ typedef enum _REG_LIST {
 
 typedef struct _MAIN_MEMORY {
     u_int32_t endPoint;
-    u_int32_t MEMORY[MEMORY_SIZE];
+    u_int32_t *MEMORY;
 }MAIN_MEMORY;
 
 // Handling structures : REG_MEMORY, PC, INSTRUCT, COUNTER
