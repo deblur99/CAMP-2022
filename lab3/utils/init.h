@@ -18,11 +18,7 @@ INSTRUCT* initInstruction();
 
 COUNTER* initCounter();
 
-void freeMainMemory(u_int32_t *memory);
-
 void freeHandler(SCYCLE_HANDLER *handler);
-
-void freeRegMemory(u_int32_t *regMemory);
 
 void freePC(PC *PC);
 

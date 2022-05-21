@@ -6,7 +6,7 @@ u_int32_t* initMainMemory() {
     u_int32_t *MEMORY = (u_int32_t *)malloc(sizeof(u_int32_t) * MEMORY_SIZE);
     memset(MEMORY, 0, MEMORY_SIZE);
 
-    FILE *fp = fopen("/mnt/c/Users/32184893/CAMP-2022/lab2/test_prog/simple.bin", "rb");
+    FILE *fp = fopen("/mnt/c/Users/deblu/CAMP/lab3/test_prog/simple.bin", "rb");
     if (fp == NULL) {
         perror("File Not Found");
         exit(1);
@@ -65,16 +65,8 @@ COUNTER* initCounter() {
 }
 
 // 메모리 해제
-void freeMainMemory(u_int32_t *memory) {
-    free(memory);
-}
-
 void freeHandler(SCYCLE_HANDLER *handler) {
     free(handler);
-}
-
-void freeRegMemory(u_int32_t *regMemory) {
-    free(regMemory);
 }
 
 void freePC(PC *PC) {

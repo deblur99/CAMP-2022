@@ -11,7 +11,7 @@ MAIN_MEMORY* initMainMemory() {
     memset(mainMemory->MEMORY, 0x0, sizeof(MEMORY_SIZE));
 
     // first arg -> "absolute" file path
-    FILE *fp = fopen("/mnt/c/Users/32184893/CAMP-2022/lab2/test_prog/simple.bin", "rb");
+    FILE *fp = fopen("/mnt/c/Users/32184893/CAMP-2022/lab2/test_prog/input4.bin", "rb");
     if (fp == NULL) {
         perror("File Not Found");
         exit(1);

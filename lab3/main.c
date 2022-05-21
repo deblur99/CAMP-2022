@@ -61,7 +61,7 @@ int main(int argc, char *argv[]) {
         handler = execute(handler);
 
         handler->PC->currPC += 4; // to be writeback function
-        showStatusAfterExecInst(handler);
+        //showStatusAfterExecInst(handler);
 
         freeInstruction(handler->inst);
     }
@@ -69,11 +69,7 @@ int main(int argc, char *argv[]) {
     showCounterAfterExecProgram(handler->counter); // print after all executions
 
     // free allocated memory
-    freeCounter(handler->counter);
-    freePC(handler->PC);
-    freeRegMemory(handler->regMemory);
     freeHandler(handler);
-    freeMainMemory(MEMORY);
 
     return 0;
 }
