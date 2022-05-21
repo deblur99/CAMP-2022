@@ -6,9 +6,9 @@ int accessMemory(u_int32_t opcode) {
         opcode == SW;
 }
 
-SCYCLE_HANDLER* readFromMemory(MAIN_MEMORY *mainMemory, SCYCLE_HANDLER *handler) {
+void readFromMemory(MAIN_MEMORY *mainMemory, SCYCLE_HANDLER *handler) {
     if (!accessMemory(handler->inst->opcode)) {
-        return handler;
+        return;
     }
 
     if (handler->inst->opcode == LW &&
@@ -18,12 +18,12 @@ SCYCLE_HANDLER* readFromMemory(MAIN_MEMORY *mainMemory, SCYCLE_HANDLER *handler)
                 + handler->inst->signExtImm];         
     }
 
-    return handler;
+    return;
 }
 
-MAIN_MEMORY* writeIntoMemory(MAIN_MEMORY *mainMemory, SCYCLE_HANDLER *handler) {
+void writeIntoMemory(MAIN_MEMORY *mainMemory, SCYCLE_HANDLER *handler) {
     if (!accessMemory(handler->inst->opcode)) {
-        return handler;
+        return;
     }
 
     switch (handler->inst->opcode) {
@@ -33,6 +33,6 @@ MAIN_MEMORY* writeIntoMemory(MAIN_MEMORY *mainMemory, SCYCLE_HANDLER *handler) {
             break;
     }
 
-    return mainMemory;
+    return;
 }
 

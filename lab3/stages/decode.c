@@ -1,9 +1,9 @@
 #include "decode.h"
 
-INSTRUCT* decode(INSTRUCT *inst, u_int32_t target) {
+void decode(INSTRUCT *inst, u_int32_t target) {
     // check target is 0x00000000 (empty)
     if (target == EMPTY) {
-        return inst;
+        return;
     }
 
     // opcode
@@ -21,7 +21,7 @@ INSTRUCT* decode(INSTRUCT *inst, u_int32_t target) {
     return decodeIType(inst, target);
 };
 
-INSTRUCT* decodeRType(INSTRUCT *inst, u_int32_t target) {
+void decodeRType(INSTRUCT *inst, u_int32_t target) {
     // optype
     strcpy(inst->optype, "R");
 
@@ -44,10 +44,10 @@ INSTRUCT* decodeRType(INSTRUCT *inst, u_int32_t target) {
     // funct
     inst->funct = target;
     
-    return inst;
+    return;
 }
 
-INSTRUCT* decodeIType(INSTRUCT *inst, u_int32_t target) {
+void decodeIType(INSTRUCT *inst, u_int32_t target) {
     strcpy(inst->optype, "I");
     
     // rs
@@ -78,14 +78,14 @@ INSTRUCT* decodeIType(INSTRUCT *inst, u_int32_t target) {
     result = (u_int32_t)(inst->immed) | 0x00000000;
     inst->zeroExtImm = result;
 
-    return inst;
+    return;
 }
 
-INSTRUCT* decodeJType(INSTRUCT *inst, u_int32_t target) {
+void decodeJType(INSTRUCT *inst, u_int32_t target) {
     strcpy(inst->optype, "J");
 
     // address
     inst->address = target;
 
-    return inst;
+    return;
 }

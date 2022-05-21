@@ -1,6 +1,6 @@
 #include "assess.h"
 
-SCYCLE_HANDLER* updateCounter(SCYCLE_HANDLER *handler) {
+void updateCounter(SCYCLE_HANDLER *handler) {
     handler->counter->returnValue =
         handler->regMemory[v0];
 
@@ -33,5 +33,5 @@ SCYCLE_HANDLER* updateCounter(SCYCLE_HANDLER *handler) {
         break;
     }
 
-    return handler;   
+    return;   
 }

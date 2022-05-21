@@ -30,20 +30,21 @@ int main(int argc, char *argv[]) {
 
     // Main tasks: all single cycles execution
     // when PC points 0xFFFFFFFF, then terminate the program.
-    while (handler->PC->currPC != 0xFFFFFFFF) {
+    //while (handler->PC->currPC != 0xFFFFFFFF) {
+    for (int i = 0; i < 20; i++) {
         handler->PC->prevPC = handler->PC->currPC;
-        handler->inst = initInstruction();
 
         showInstructorAfterFetch(handler);
 
-        handler->inst = decode(handler->inst, fetch(handler->PC->currPC, mainMemory));
+        decode(handler->inst, fetch(handler->PC->currPC, mainMemory));
         showInstructorAfterDecode(handler->inst);
-        handler = execute(handler, mainMemory);
-        mainMemory = writeIntoMemory(mainMemory, handler); // Access memory
-        handler = updatePC(handler); // writeback
+        execute(handler, mainMemory);
+        writeIntoMemory(mainMemory, handler); // Access memory
+        
+        updatePC(handler); // writeback
         
         showStatusAfterExecInst(handler);
-        handler = updateCounter(handler);
+        updateCounter(handler);
     }
 
     showCounterAfterExecProgram(handler); // print after all executions

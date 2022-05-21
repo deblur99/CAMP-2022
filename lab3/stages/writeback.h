@@ -6,4 +6,4 @@
 
 #include "../utils/defines.h"
 
-SCYCLE_HANDLER* updatePC(SCYCLE_HANDLER *handler);
+void updatePC(SCYCLE_HANDLER *handler);

@@ -1,24 +1,19 @@
 #include "execute.h"
 
-SCYCLE_HANDLER* execute(SCYCLE_HANDLER *handler, MAIN_MEMORY *mainMemory) {
+void execute(SCYCLE_HANDLER *handler, MAIN_MEMORY *mainMemory) {
     switch (handler->inst->optype[0]) {
     case 'R':
-        handler = executeRType(handler);
-        break;
+        return executeRType(handler);
     
     case 'I':
-        handler = executeIType(handler, mainMemory);
-        break;
+        return executeIType(handler, mainMemory);
 
     case 'J':
-        handler = executeJType(handler);
-        break;
+        return executeJType(handler);
     }
-
-    return handler;
 }
 
-SCYCLE_HANDLER* executeRType(SCYCLE_HANDLER *handler) {
+void executeRType(SCYCLE_HANDLER *handler) {
     if (handler->inst->opcode == RTYPE) {
         switch (handler->inst->funct) {
         case MOVE:
@@ -123,10 +118,10 @@ SCYCLE_HANDLER* executeRType(SCYCLE_HANDLER *handler) {
         }
     }
 
-    return handler;
+    return;
 }
 
-SCYCLE_HANDLER* executeIType(SCYCLE_HANDLER *handler, MAIN_MEMORY *mainMemory) {
+void executeIType(SCYCLE_HANDLER *handler, MAIN_MEMORY *mainMemory) {
     switch (handler->inst->opcode) {
     case LW:
     // R[rt] = M[R[rs]+SignExtImm]
@@ -192,10 +187,10 @@ SCYCLE_HANDLER* executeIType(SCYCLE_HANDLER *handler, MAIN_MEMORY *mainMemory) {
         break;
     }
 
-    return handler;
+    return;
 }
 
-SCYCLE_HANDLER* executeJType(SCYCLE_HANDLER *handler) {
+void executeJType(SCYCLE_HANDLER *handler) {
     switch (handler->inst->opcode) {
     case J:
         handler->PC->prevPC = handler->PC->currPC;
@@ -210,5 +205,5 @@ SCYCLE_HANDLER* executeJType(SCYCLE_HANDLER *handler) {
         break;
     }
 
-    return handler;
+    return;
 }

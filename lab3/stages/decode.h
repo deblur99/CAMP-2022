@@ -6,10 +6,10 @@
 
 #include "../utils/defines.h"
 
-INSTRUCT* decode(INSTRUCT *inst, u_int32_t target);
+void decode(INSTRUCT *inst, u_int32_t target);
 
-INSTRUCT* decodeRType(INSTRUCT *inst, u_int32_t target);
+void decodeRType(INSTRUCT *inst, u_int32_t target);
 
-INSTRUCT* decodeIType(INSTRUCT *inst, u_int32_t target);
+void decodeIType(INSTRUCT *inst, u_int32_t target);
 
-INSTRUCT* decodeJType(INSTRUCT *inst, u_int32_t target);
+void decodeJType(INSTRUCT *inst, u_int32_t target);

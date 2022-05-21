@@ -6,4 +6,4 @@
 
 #include "defines.h"
 
-SCYCLE_HANDLER* updateCounter(SCYCLE_HANDLER *handler);
+void updateCounter(SCYCLE_HANDLER *handler);
