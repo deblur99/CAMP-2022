@@ -117,12 +117,9 @@ SCYCLE_HANDLER* executeRType(SCYCLE_HANDLER *handler) {
                 handler->regMemory[handler->inst->rt] >> handler->inst->shmat;
             break;
 
-        
         case JR:
         // PC = R[rs]
-            handler->PC->prevPC = handler->PC->currPC;
-            handler->PC->currPC = handler->regMemory[handler->inst->rs];  
-            break;
+            break;               
         }
     }
 
@@ -131,12 +128,6 @@ SCYCLE_HANDLER* executeRType(SCYCLE_HANDLER *handler) {
 
 SCYCLE_HANDLER* executeIType(SCYCLE_HANDLER *handler, MAIN_MEMORY *mainMemory) {
     switch (handler->inst->opcode) {
-    // R[rt] = immed
-    case LI:
-        handler->regMemory[handler->inst->rt] 
-            = handler->inst->immed;
-        break;
-
     case LW:
     // R[rt] = M[R[rs]+SignExtImm]
         handler->regMemory[handler->inst->rt] = 

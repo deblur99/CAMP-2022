@@ -1,7 +1,7 @@
 CC = gcc
 
-main : main.o init.o assess.o show.o fetch.o decode.o execute.o mem_access.o
-	gcc -o main main.o init.o assess.o show.o fetch.o decode.o execute.o mem_access.o
+main : main.o init.o assess.o show.o fetch.o decode.o execute.o mem_access.o writeback.o
+	gcc -o main main.o init.o assess.o show.o fetch.o decode.o execute.o mem_access.o writeback.o
 
 main.o : main.c
 	gcc -c main.c
@@ -26,6 +26,9 @@ execute.o : ./stages/execute.c
 
 mem_access.o : ./stages/mem_access.c
 	gcc -c ./stages/mem_access.c
+
+writeback.o: ./stages/writeback.c
+	gcc -c ./stages/writeback.c
 
 clean :
 	rm *.o

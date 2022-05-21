@@ -27,13 +27,13 @@
 #define ADD             0x20 
 #define ADDU            0x21
 #define AND             0x24
-#define JR              0x08
+#define JR              0x8
 #define NOR             0x27
 #define OR              0x25
 #define SLT             0x2A
 #define SLTU            0x2B
-#define SLL             0x00
-#define SRL             0x02
+#define SLL             0x0
+#define SRL             0x2
 #define SUB             0x22
 #define SUBU            0x23
 #define DIV             0x1A
@@ -46,8 +46,6 @@
 #define SRA             0x3
 
 // I type opcode
-#define LI              0x24
-
 #define ADDI            0x8
 #define ADDIU           0x9
 #define ANDI            0xC

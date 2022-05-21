@@ -6,6 +6,7 @@
 #include "./stages/decode.h"
 #include "./stages/execute.h"
 #include "./stages/mem_access.h"
+#include "./stages/writeback.h"
 
 MAIN_MEMORY *mainMemory = NULL;
 SCYCLE_HANDLER *handler = NULL;
@@ -29,28 +30,20 @@ int main(int argc, char *argv[]) {
 
     // Main tasks: all single cycles execution
     // when PC points 0xFFFFFFFF, then terminate the program.
-    while (handler->PC->currPC < MEMORY_SIZE &&
-            handler->PC->currPC < 4 * mainMemory->endPoint) {
-
+    while (handler->PC->currPC != 0xFFFFFFFF) {
         handler->PC->prevPC = handler->PC->currPC;
         handler->inst = initInstruction();
 
         showInstructorAfterFetch(handler);
 
         handler->inst = decode(handler->inst, fetch(handler->PC->currPC, mainMemory));
-
         showInstructorAfterDecode(handler->inst);
-
         handler = execute(handler, mainMemory);
-
-        mainMemory = writeIntoMemory(mainMemory, handler);
+        mainMemory = writeIntoMemory(mainMemory, handler); // Access memory
+        handler = updatePC(handler); // writeback
         
-        if (handler->inst->optype[0] != 'J')
-            handler->PC->currPC += 4; // to be writeback function
         showStatusAfterExecInst(handler);
         handler = updateCounter(handler);
-
-        freeInstruction(handler->inst);
     }
 
     showCounterAfterExecProgram(handler); // print after all executions
