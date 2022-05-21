@@ -59,7 +59,24 @@ INSTRUCT* decodeIType(INSTRUCT *inst, u_int32_t target) {
     target = target << 16 >> 16; // strip rt
 
     // immediate
-    inst->immed = target;
+    inst->immed = (int16_t)(target);
+
+    // signExtImm
+    u_int32_t MSB = inst->immed >> 15 << 16;
+    u_int32_t result = 0x00000000;
+
+    result = result | target;
+    for (int i = 0; i < 16; i++) {
+        result  = result | MSB;
+        MSB = MSB << 1;
+    }
+    inst->signExtImm = result;
+
+    result = 0x0; // init
+
+    // ZeroExtImm
+    result = (u_int32_t)(inst->immed) | 0x00000000;
+    inst->zeroExtImm = result;
 
     return inst;
 }

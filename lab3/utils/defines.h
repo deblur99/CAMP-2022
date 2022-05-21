@@ -9,8 +9,8 @@
 #include <string.h>
 #include <sys/types.h>
 
-#define MEMORY_SIZE     0x1000 // original size is 0xFFFFFFFF
-#define REG_MEMORY_SIZE 0x20   // values in each $0~$31 registers
+#define MEMORY_SIZE     0x10000000 // original size is 0xFFFFFFFF
+#define REG_MEMORY_SIZE 0x20       // values in each $0~$31 registers
 
 #define OPCODE_MASK     0x000000FF
 
@@ -22,6 +22,8 @@
 #define RTYPE           0x0
 
 // R type funct
+#define MOVE            0x21
+
 #define ADD             0x20 
 #define ADDU            0x21
 #define AND             0x24
@@ -31,7 +33,7 @@
 #define SLT             0x2A
 #define SLTU            0x2B
 #define SLL             0x00
-#define SLR             0x02
+#define SRL             0x02
 #define SUB             0x22
 #define SUBU            0x23
 #define DIV             0x1A
@@ -44,6 +46,8 @@
 #define SRA             0x3
 
 // I type opcode
+#define LI              0x24
+
 #define ADDI            0x8
 #define ADDIU           0x9
 #define ANDI            0xC
@@ -102,8 +106,12 @@ typedef enum _REG_LIST {
 
 }REG_LIST;
 
-// Handlers : REG_MEMORY, PC, INSTRUCT, COUNTER
+typedef struct _MAIN_MEMORY {
+    u_int32_t endPoint;
+    u_int32_t *MEMORY;
+}MAIN_MEMORY;
 
+// Handling structures : REG_MEMORY, PC, INSTRUCT, COUNTER
 // PCs
 typedef struct _PC {
     u_int32_t prevPC;
@@ -137,10 +145,8 @@ typedef struct _INSTRUCT {
 
 // for counting instructions, branches
 typedef struct _COUNTER {
-    u_int32_t cycle;
-
     int32_t returnValue;
-    
+
     u_int32_t executedInst;
     u_int32_t executedRTypeInst;
     u_int32_t executedITypeInst;
@@ -152,8 +158,9 @@ typedef struct _COUNTER {
 }COUNTER;
 
 typedef struct _SCYCLE_HANDLER {
-    u_int32_t *regMemory;
+    int32_t *regMemory;
     PC *PC;
     INSTRUCT *inst;
     COUNTER *counter;
+
 }SCYCLE_HANDLER;

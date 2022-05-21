@@ -1,11 +1,16 @@
-// 초기화 및 메모리 해제 함수 정의
 #include "init.h"
 
-// 할당
-u_int32_t* initMainMemory() {
-    u_int32_t *MEMORY = (u_int32_t *)malloc(sizeof(u_int32_t) * MEMORY_SIZE);
-    memset(MEMORY, 0, MEMORY_SIZE);
+// allocate and initialize
+MAIN_MEMORY* initMainMemory() {
+    MAIN_MEMORY *mainMemory = (MAIN_MEMORY *)malloc(sizeof(MAIN_MEMORY));
+    memset(mainMemory, 0x0, sizeof(MAIN_MEMORY));
 
+    mainMemory->endPoint = 0;
+
+    mainMemory->MEMORY = (u_int32_t *)malloc(MEMORY_SIZE);
+    memset(mainMemory->MEMORY, 0x0, sizeof(MEMORY_SIZE));
+
+    // first arg -> "absolute" file path
     FILE *fp = fopen("/mnt/c/Users/deblu/CAMP/lab3/test_prog/simple.bin", "rb");
     if (fp == NULL) {
         perror("File Not Found");
@@ -13,8 +18,8 @@ u_int32_t* initMainMemory() {
     }
 
     int amount = 0; // amount of binary values in .o    
-    while (!feof(fp)) {
-        fread(&MEMORY[4 * amount++], sizeof(int), 1, fp);
+    while (fread(&mainMemory->MEMORY[4 * amount++], 1, sizeof(int), fp) == 4) {
+        ;
     }
 
     printf("=========================\n");
@@ -22,13 +27,15 @@ u_int32_t* initMainMemory() {
     printf("=========================\n");
     // print all loaded data from MEMORY array
     for (int i = 0; i < amount; i++) {
-        printf("0x%X: 0x%08X\n", 4 * i, MEMORY[4 * i]);
+        printf("0x%X: 0x%08X\n", 4 * i, mainMemory->MEMORY[4 * i]);
     }
-    printf("=========================\n\n");
+    printf("=========================\n");
     
     fclose(fp);
 
-    return MEMORY;
+    mainMemory->endPoint = amount;
+
+    return mainMemory;
 }
 
 SCYCLE_HANDLER* initHandler() {
@@ -38,9 +45,9 @@ SCYCLE_HANDLER* initHandler() {
     return handler;
 }
 
-u_int32_t* initRegMemory() {
-    u_int32_t *regMemory = (u_int32_t *)malloc(sizeof(u_int32_t) * REG_MEMORY_SIZE);
-    memset(regMemory, 0, sizeof(regMemory));
+int32_t* initRegMemory() {
+    int32_t *regMemory = (int32_t *)malloc(sizeof(int32_t) * REG_MEMORY_SIZE);
+    memset(regMemory, 0, REG_MEMORY_SIZE);
 
     return regMemory;
 }
@@ -59,24 +66,17 @@ INSTRUCT* initInstruction() {
 
 COUNTER* initCounter() {
     COUNTER *counter = (COUNTER *)malloc(sizeof(COUNTER));
-    memset(counter, 0, sizeof(COUNTER));
+    memset(counter, 0, sizeof(COUNTER));    
 
     return counter;
 }
 
-// 메모리 해제
+// free memory
+void freeMainMemory(MAIN_MEMORY *memory) {
+    free(memory->MEMORY);
+    free(memory);
+}
+
 void freeHandler(SCYCLE_HANDLER *handler) {
     free(handler);
-}
-
-void freePC(PC *PC) {
-    free(PC);
-}
-
-void freeInstruction(INSTRUCT *inst) {
-    free(inst);
-}
-
-void freeCounter(COUNTER *counter) {
-    free(counter);
 }

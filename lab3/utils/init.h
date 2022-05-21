@@ -6,11 +6,11 @@
 
 #include "defines.h"
 
-u_int32_t* initMainMemory();
+MAIN_MEMORY* initMainMemory();
 
 SCYCLE_HANDLER* initHandler();
 
-u_int32_t* initRegMemory();
+int32_t* initRegMemory();
 
 PC* initPC();
 
@@ -18,10 +18,6 @@ INSTRUCT* initInstruction();
 
 COUNTER* initCounter();
 
+void freeMainMemory(MAIN_MEMORY *memory);
+
 void freeHandler(SCYCLE_HANDLER *handler);
-
-void freePC(PC *PC);
-
-void freeInstruction(INSTRUCT *inst);
-
-void freeCounter(COUNTER *counter);
