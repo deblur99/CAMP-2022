@@ -11,6 +11,7 @@
         "fetch.h": "c",
         "decode.h": "c",
         "init.h": "c",
-        "mem_access.h": "c"
+        "mem_access.h": "c",
+        "functional": "c"
     }
 }

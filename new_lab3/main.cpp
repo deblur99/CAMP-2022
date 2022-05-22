@@ -11,12 +11,20 @@
  * pipelining 구현하기
 *******************/
 
+// 추가로 구현해야 하는 것
+// * simple3
+// slti, bnez
+// * simple4
+// bne (잘 되는지?)
+// j (잘 되는지 봐야함)
+// * 
+
 #include "defines.h"
 
 using namespace std;
 
-int32_t MEMORY[0x10000000]; // actual size is 0xFFFFFFFF
-u_int32_t REG_MEMORY[0x20];
+int32_t MEMORY[0x10000000] = {0, }; // actual size is 0xFFFFFFFF
+u_int32_t REG_MEMORY[0x20] = {0, };
 
 enum Register {
     zero = 0x0,                   // always zero ($0)
@@ -49,37 +57,37 @@ enum Register {
 class Inst {
 protected:
     char optype;
-    u_int32_t opcode;      // for R, I, J type
+    u_int32_t opcode = 0x0;         // for R, I, J type
 
-    u_int32_t rs;          // for R, I type          
-    u_int32_t rt;          // for R, I type
-    u_int32_t rd;          // for R type
+    u_int32_t rs = 0x0;             // for R, I type          
+    u_int32_t rt = 0x0;             // for R, I type
+    u_int32_t rd = 0x0;             // for R type
 
-    u_int32_t shmat;       // for R type
-    u_int32_t funct;       // for R type
+    u_int32_t shmat = 0x0;          // for R type
+    u_int32_t funct = 0x0;          // for R type
 
-    int16_t immed;         // for I type
-    
-    u_int32_t address;     // for J type
+    int16_t immed = 0x0;            // for I type
 
-    int32_t signExtImm;    // for I type (addi, addiu, lbu, lhu, lw, slti, sltiu, sb, sc, sh, sw, lwcu, ldcl, swcl, sdcl)
-    int32_t zeroExtImm;    // for I type (andi, ori)
+    int32_t signExtImm = 0x0;       // for I type (addi, addiu, lbu, lhu, lw, slti, sltiu, sb, sc, sh, sw, lwcu, ldcl, swcl, sdcl)
+    int32_t zeroExtImm = 0x0;       // for I type (andi, ori)
 
-    u_int32_t branchAddr;  // for Branch (beq, bne)
-    u_int32_t jumpAddr;    // for Jump (j, jal)
+    bool isMetBranchCond = false;   // for Branch (beq, bne)
+    u_int32_t branchAddr = 0x0;     // for Branch (beq, bne)
+
+    u_int32_t jumpAddr = 0x0;       // for Jump (j, jal)
 };
 
 class Counter {
 protected:
-    int32_t returnValue;
+    int32_t returnValue = 0;
 
-    u_int32_t executedInst;
-    u_int32_t executedRTypeInst;
-    u_int32_t executedITypeInst;
-    u_int32_t executedJTypeInst;
-    u_int32_t memoryAccessInst;
+    u_int32_t executedInst = 0;
+    u_int32_t executedRTypeInst = 0;
+    u_int32_t executedITypeInst = 0;
+    u_int32_t executedJTypeInst = 0;
+    u_int32_t memoryAccessInst = 0;
 
-    u_int32_t takenBranches;
+    u_int32_t takenBranches = 0;
 };
 
 class Simulator: public Inst, Counter {
@@ -89,9 +97,9 @@ private:
     int amount = 0;
 
     u_int32_t PC = 0x0;
-    u_int32_t inst;
+    u_int32_t inst = 0x0;
 
-    void initRegMemory() {
+    void initREG_MEMORY() {
         REG_MEMORY[sp] = 0x1000000;
         REG_MEMORY[ra] = 0xFFFFFFFF;
     }
@@ -100,13 +108,13 @@ private:
         vector<char> directory(_filename.begin(), _filename.end());
         directory.push_back('\0');
         char *d_ptr = &directory[0];
-
         if ((fp = fopen(d_ptr, "rb")) == NULL) {
             perror("File Not Found");
             return;
         }
         
-        while (fread(&MEMORY[4 * amount++], 1, sizeof(int), fp) == 4) {
+        int size = 0;
+        while (fread(&MEMORY[4 * size++], 1, sizeof(int), fp) == 4) {
             ;
         }
 
@@ -114,16 +122,16 @@ private:
         printf("All loaded data from .bin\n");
         printf("=========================\n");
         // print all loaded data from MEMORY array
-        for (int i = 0; i < amount; i++) {
+        for (int i = 0; i < size; i++) {
             printf("0x%X: 0x%08X\n", 4 * i, MEMORY[4 * i]);
         }
         printf("=========================\n");
     
-        fclose(fp);
+        fclose(fp); 
     }
 
     void fetch() {   
-        u_int32_t inst = MEMORY[PC];
+        inst = MEMORY[PC];
 
         u_int32_t result =          0x00000000;
 
@@ -138,8 +146,6 @@ private:
         result = result | (r4 << 24);
 
         inst = result;
-
-        printf("0x%08X\n", inst); // test
     }   
 
     void decode() {
@@ -222,7 +228,7 @@ private:
         optype = 'J';
 
         // address
-        address = inst;
+        jumpAddr = inst; // rest
     }
 
     void execute() {
@@ -242,99 +248,83 @@ private:
         if (opcode == RTYPE) {
             switch (funct) {
             case MOVE:
-                handler->regMemory[handler->inst->rd] = 
-                    handler->regMemory[handler->inst->rs];
+                REG_MEMORY[rd] = REG_MEMORY[rs];
                 break;
 
             // R[rd] = R[rs] + R[rt]
             case ADD:
-                handler->regMemory[handler->inst->rd] = 
-                    handler->regMemory[handler->inst->rs] 
-                        + handler->regMemory[handler->inst->rt]; 
+                REG_MEMORY[rd] =
+                    REG_MEMORY[rs] + REG_MEMORY[rt];     
                 break;
 
             // R[rd] = R[rs] - R[rt]
             case SUB:
-                handler->regMemory[handler->inst->rd] = 
-                    handler->regMemory[handler->inst->rs] 
-                        - handler->regMemory[handler->inst->rt]; 
+                REG_MEMORY[rd] = 
+                    REG_MEMORY[rs] - REG_MEMORY[rt]; 
                 break;
 
             case SUBU:
-                handler->regMemory[handler->inst->rd] =  
-                    handler->regMemory[handler->inst->rs] 
-                        - (u_int32_t)(handler->regMemory[handler->inst->rt]); 
+                REG_MEMORY[rd] =  
+                    REG_MEMORY[rs] - (u_int32_t)(REG_MEMORY[rt]); 
                 break;
 
             // R[rd] = R[rs] * R[rt]
             case MULT:
-                handler->regMemory[handler->inst->rd] = 
-                    handler->regMemory[handler->inst->rs] 
-                        * handler->regMemory[handler->inst->rt]; 
+                REG_MEMORY[rd] = 
+                    REG_MEMORY[rs] * REG_MEMORY[rt]; 
                 break;
 
             case MULTU:
-                handler->regMemory[handler->inst->rd] = 
-                    handler->regMemory[handler->inst->rs] 
-                        * (u_int32_t)(handler->regMemory[handler->inst->rt]); 
+                REG_MEMORY[rd] = 
+                    REG_MEMORY[rs] * (u_int32_t)(REG_MEMORY[rt]); 
                 break;
 
             // R[rd] = R[rs] / R[rt]
             case DIV:
-                handler->regMemory[handler->inst->rd] = 
-                    handler->regMemory[handler->inst->rs] 
-                        / handler->regMemory[handler->inst->rt]; 
+                REG_MEMORY[rd] = 
+                    REG_MEMORY[rs] / REG_MEMORY[rt]; 
                 break;
 
             case DIVU:
-                handler->regMemory[handler->inst->rd] = 
-                    handler->regMemory[handler->inst->rs] 
-                        / (u_int32_t)(handler->regMemory[handler->inst->rt]); 
+                REG_MEMORY[rd] = 
+                    REG_MEMORY[rs] / (u_int32_t)(REG_MEMORY[rt]); 
                 break;
 
-
             case AND:
-                handler->regMemory[handler->inst->rd] = 
-                    handler->regMemory[handler->inst->rs] 
-                        & handler->regMemory[handler->inst->rt];
+                REG_MEMORY[rd] = 
+                    REG_MEMORY[rs] & REG_MEMORY[rt];
                 break;
 
             case NOR:
-                handler->regMemory[handler->inst->rd] = 
-                    ~(handler->regMemory[handler->inst->rs] 
-                        | handler->regMemory[handler->inst->rt]);
+                REG_MEMORY[rd] = 
+                    ~(REG_MEMORY[rs] | REG_MEMORY[rt]);
                 break;
 
             case OR:
-                handler->regMemory[handler->inst->rd] = 
-                    handler->regMemory[handler->inst->rs] 
-                        | handler->regMemory[handler->inst->rt];
+                REG_MEMORY[rd] = 
+                    REG_MEMORY[rs] | REG_MEMORY[rt];
                 break;
 
             // R[rd] = (R[rs] < R[rt]) ? 1 : 0
             case SLT:
-                handler->regMemory[handler->inst->rd] = 
-                    handler->regMemory[handler->inst->rs] 
-                        < handler->regMemory[handler->inst->rt];
+                REG_MEMORY[rd] = 
+                    REG_MEMORY[rs] < REG_MEMORY[rt];
                 break;
 
             // R[rd] = (R[rs] < R[rt]) ? 1 : 0
             case SLTU:
-                handler->regMemory[handler->inst->rd] = 
-                    (u_int32_t)(handler->regMemory[handler->inst->rs]) 
-                        < (u_int32_t)(handler->regMemory[handler->inst->rt]);
+                REG_MEMORY[rd] = 
+                    (u_int32_t)(REG_MEMORY[rs]) < (u_int32_t)(REG_MEMORY[rt]);
                 break;
 
             // R[rd] = R[rt] << shamt
             case SLL:
-                handler->regMemory[handler->inst->rd] = 
-                    handler->regMemory[handler->inst->rt] << handler->inst->shmat;
+                REG_MEMORY[rd] = REG_MEMORY[rt] << shmat;
                 break;
 
             // R[rd] = R[rt] >> shamt
             case SRL:
-                handler->regMemory[handler->inst->rd] = 
-                    handler->regMemory[handler->inst->rt] >> handler->inst->shmat;
+                REG_MEMORY[rd] = REG_MEMORY[rt] >> shmat;
                 break;
 
             case JR:
@@ -346,13 +336,12 @@ private:
         return;
     }
 
-    void executeIType(SCYCLE_HANDLER *handler, MAIN_MEMORY *mainMemory) {
-        switch (handler->inst->opcode) {
+    void executeIType() {
+        switch (opcode) {
         case LW:
         // R[rt] = M[R[rs]+SignExtImm]
-            handler->regMemory[handler->inst->rt] = 
-                mainMemory->MEMORY[handler->regMemory[handler->inst->rs] 
-                    + handler->inst->signExtImm];
+            REG_MEMORY[rt] = 
+                MEMORY[REG_MEMORY[rs] + signExtImm];
             break;
 
         // postpone to the next step : access memory
@@ -363,51 +352,38 @@ private:
         // R[rt] = R[rs] + SignExtImm
         // rs가 가리키는 레지스터에 저장되어 있는 값 가져온다.
         // ex) rs가 0x11를 가리키면 0 + 0x11번째, 즉 17번째 레지스터에 저장된 값을 가져온다.
-            handler->regMemory[handler->inst->rt] = 
-                handler->regMemory[handler->inst->rs] 
-                    + handler->inst->signExtImm;    
+            REG_MEMORY[rt] = 
+                REG_MEMORY[rs] + signExtImm;    
             break;
 
         case ADDIU:
         // R[rt] = R[rs] + SignExtImm
-            handler->regMemory[handler->inst->rt] = 
-                handler->regMemory[handler->inst->rs] 
-                    + (u_int32_t)(handler->inst->signExtImm);
+            REG_MEMORY[rt] = 
+                REG_MEMORY[rs] + (u_int32_t)(signExtImm);
             break;
 
         case ANDI:
-            handler->regMemory[handler->inst->rt] = 
-                handler->regMemory[handler->inst->rs] 
-                    & handler->inst->zeroExtImm;
+            REG_MEMORY[rt] = 
+                REG_MEMORY[rs] & zeroExtImm;
             break;
 
         case ORI:
-            handler->regMemory[handler->inst->rt] = 
-                handler->regMemory[handler->inst->rs]
-                    | handler->inst->zeroExtImm;
+            REG_MEMORY[rt] = 
+                REG_MEMORY[rs] | zeroExtImm;
             break;
 
         // PC = PC + 4 + BranchAddr
         // BranchAddr = signExtImm << 2
         case BEQ:
-            if (handler->regMemory[handler->inst->rs]
-                    == handler->regMemory[handler->inst->rt]) {
-
-                handler->PC->prevPC = handler->PC->currPC;
-
-                handler->PC->currPC = handler->PC->currPC 
-                    + (handler->inst->signExtImm << 2);
+            if (REG_MEMORY[rs] == REG_MEMORY[rt]) {
+                isMetBranchCond = (REG_MEMORY[rs] == REG_MEMORY[rt]);
+                PC += signExtImm << 2;
             }
             break;
 
         case BNE:
-            if (handler->regMemory[handler->inst->rs]
-                    != handler->regMemory[handler->inst->rt]) {
-                    
-                handler->PC->prevPC = handler->PC->currPC;
-
-                handler->PC->currPC = handler->PC->currPC 
-                    + (handler->inst->signExtImm << 2);
+            if (REG_MEMORY[rs] != REG_MEMORY[rt]) {
+                PC += (signExtImm << 2);
             }
             break;
         }
@@ -415,18 +391,15 @@ private:
         return;
     }
 
-    void executeJType(SCYCLE_HANDLER *handler) {
-        switch (handler->inst->opcode) {
+    // JAL의 경우 execute 단계에서 ra 레지스터에 현재 PC값 + 8 저장하고,
+    // writeback 단계에서 JumpAddr 저장한다.
+    void executeJType() {
+        switch (opcode) {
         case J:
-            handler->PC->prevPC = handler->PC->currPC;
-            handler->PC->currPC = handler->inst->address;        // PC = JumpAddr
             break;
 
         case JAL:
-            handler->regMemory[ra] = handler->PC->currPC + 0x8;  // R[31] = PC + 8
-
-            handler->PC->prevPC = handler->PC->currPC;
-            handler->PC->currPC = handler->inst->address;        // PC = JumpAddr
+            REG_MEMORY[ra] = PC + 0x8;  // R[31] = PC + 8
             break;
         }
 
@@ -434,36 +407,178 @@ private:
     }
 
     void accessMemory() {
+        if (opcode == LW || opcode == LWCL)
+            return readFromMemory();
 
+        if (opcode == SW)
+            return writeIntoMemory();
+    }
+
+    void readFromMemory() {
+        REG_MEMORY[rt] = MEMORY[rs + signExtImm];
+    }
+
+    void writeIntoMemory() {
+        MEMORY[rs + signExtImm] = REG_MEMORY[rt];
     }
 
     void writeback() {
+        if (optype == 'R' && funct == JR) {
+            PC = REG_MEMORY[rs];
+            return;
+        }
+
+        if (opcode == J || opcode == JAL) {
+            PC = jumpAddr;
+            return;
+        }
+
+        // if "Condition" meets in BNE, BEQ inst
+        if (isMetBranchCond) {
+            PC += signExtImm << 2;
+            isMetBranchCond = false;
+            return;
+        }
+
+        // the rest case, generally PC gets plus 4
         PC += 4;
+    }
+
+    void updateCounter() {
+        returnValue = REG_MEMORY[v0];
+
+        executedInst++;    
+
+        switch (optype) {
+        case 'R':
+            executedRTypeInst++;
+            break;
+
+        case 'I':
+            executedITypeInst++;
+
+            if (opcode == LW || opcode == SW)
+                memoryAccessInst++;
+
+            if (opcode == BEQ || opcode == BNE)
+                takenBranches++;
+
+            break;
+
+        case 'J':
+            executedJTypeInst++;
+            break;
+        }   
+    }
+
+    void showInstructorAfterFetch() {
+        printf("[Fetch] %d Cycle, at 0x%08X PC Address\n", executedInst + 1, PC);
+    }
+
+    void showInstructorAfterDecode() {
+        printf("[Decode] ");
+        printf("optype: %c, opcode: 0x%X", optype, opcode);
+
+        if (optype == 'R' || optype == 'I') {
+            printf(", rs: 0x%X, rt: 0x%X", rs, rt);
+        }
+
+        switch (optype)
+        {
+        case 'R':
+            printf(", rd: 0x%X, shamt: 0x%X, funct: 0x%X\n",
+                    rd, shmat, funct);
+            break;
+
+        case 'I':
+            printf(", immediate: 0x%X\n", immed);
+            break;
+
+        case 'J':
+            if (opcode == J || opcode == JR || opcode == JAL)
+                printf(", address: 0x%X\n", jumpAddr);
+
+        default:
+            printf("\n");
+            break;
+        }
+    }
+
+    void showStatusAfterExecInst() {      
+        printf("[Execute] ");
+
+        switch (optype) {
+        case 'R':
+            printf("(rs) $%d: 0x%08X, ", rs, REG_MEMORY[rs]);
+            printf("(rt) $%d: 0x%08X, ", rt, REG_MEMORY[rt]);
+            printf("(rd) $%d: 0x%08X, ", rd, REG_MEMORY[rd]);
+            break;
+
+        case 'I':
+            printf("(rs) $%d: 0x%08X, ", rs, REG_MEMORY[rs]);
+            printf("(rt) $%d: 0x%08X, ", rt, REG_MEMORY[rt]);
+            break;
+
+        case 'J':
+            break;
+        }
+
+        printf("Updated PC: 0x%08X\n", PC);
+        printf("=========================\n");
+    
+        return;
+    }
+
+    // about counting
+    void showCounterAfterExecProgram() {
+        printf("\n******************************************************\n");
+
+        printf("All instructions in the program have been executed.\n");
+        printf("======================================================\n");
+        printf("1) Final return value ($2) : 0x%X\n", REG_MEMORY[v0]);
+        printf("2) Number of executed instructions (Total cycles) : %d\n", executedInst);
+        printf("3) Number of executed R-type instruction : %d\n", executedRTypeInst);
+        printf("4) Number of executed I-type instruction : %d\n", executedITypeInst);
+        printf("5) Number of executed J-type instruction : %d\n", executedJTypeInst);
+        printf("6) Number of memory access instructions : %d\n", memoryAccessInst);
+        printf("7) Number of taken branches : %d\n", takenBranches);
+        printf("======================================================\n");
+
+        printf("******************************************************\n");
     }
 
 public:
     Simulator(string filename) {
         _filename = filename;
-
         loadFile();
     }
 
     void run() {
-        initRegMemory();
+        if (fp == NULL) return;
 
-        // debug
-        for (int i = 0; i < 10; i++) {
+        initREG_MEMORY();
+
+        while (PC != 0xFFFFFFFF) {
             fetch();
+            //showInstructorAfterFetch();
+
             decode();
+            //showInstructorAfterDecode();
+
             execute();
             accessMemory();
             writeback();
+            //showStatusAfterExecInst();
+
+            updateCounter();
         }
+
+        showCounterAfterExecProgram();
     }
 };
 
 int main() {
-    Simulator s("/mnt/c/Users/deblu/CAMP/new_lab3/test_prog/simple.bin");
+    Simulator s("/mnt/c/Users/32184893/CAMP-2022/new_lab3/test_prog/input4.bin");
     s.run();
 
     return 0;
