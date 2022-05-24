@@ -372,18 +372,25 @@ private:
                 REG_MEMORY[rs] | zeroExtImm;
             break;
 
+        case SLTI:
+            REG_MEMORY[rt] = 
+                (int32_t)REG_MEMORY[rs] < signExtImm;
+        
+        case SLTIU:
+            REG_MEMORY[rt] = 
+                REG_MEMORY[rs] < (u_int32_t)signExtImm;
+
         // PC = PC + 4 + BranchAddr
         // BranchAddr = signExtImm << 2
         case BEQ:
-            if (REG_MEMORY[rs] == REG_MEMORY[rt]) {
-                isMetBranchCond = (REG_MEMORY[rs] == REG_MEMORY[rt]);
-                PC += signExtImm << 2;
+            if (isMetBranchCond = (REG_MEMORY[rs] == REG_MEMORY[rt])) {
+                PC = PC + 4 + (immed << 2);
             }
             break;
 
         case BNE:
-            if (REG_MEMORY[rs] != REG_MEMORY[rt]) {
-                PC += (signExtImm << 2);
+            if (isMetBranchCond = (REG_MEMORY[rs] != REG_MEMORY[rt])) {
+                PC = PC + 4 + (immed << 2);
             }
             break;
         }
@@ -429,7 +436,7 @@ private:
         }
 
         if (opcode == J || opcode == JAL) {
-            PC = jumpAddr;
+            PC = ((PC + 4) & 0xf0000000) | (jumpAddr << 2);
             return;
         }
 
@@ -535,7 +542,7 @@ private:
 
         printf("All instructions in the program have been executed.\n");
         printf("======================================================\n");
-        printf("1) Final return value ($2) : 0x%X\n", REG_MEMORY[v0]);
+        printf("1) Final return value ($2) : %d\n", REG_MEMORY[v0]);
         printf("2) Number of executed instructions (Total cycles) : %d\n", executedInst);
         printf("3) Number of executed R-type instruction : %d\n", executedRTypeInst);
         printf("4) Number of executed I-type instruction : %d\n", executedITypeInst);
@@ -578,7 +585,7 @@ public:
 };
 
 int main() {
-    Simulator s("/mnt/c/Users/32184893/CAMP-2022/new_lab3/test_prog/input4.bin");
+    Simulator s("/mnt/c/Users/deblu/CAMP/new_lab3/test_prog/simple3.bin");
     s.run();
 
     return 0;
