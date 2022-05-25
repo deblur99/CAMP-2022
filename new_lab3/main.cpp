@@ -75,6 +75,28 @@ protected:
     u_int32_t branchAddr = 0x0;     // for Branch (beq, bne)
 
     u_int32_t jumpAddr = 0x0;       // for Jump (j, jal)
+
+    void initInstructor() {
+        char optype = '\0';
+        u_int32_t opcode = 0x0;         
+
+        u_int32_t rs = 0x0;             
+        u_int32_t rt = 0x0;             
+        u_int32_t rd = 0x0;             
+
+        u_int32_t shmat = 0x0;          
+        u_int32_t funct = 0x0;          
+
+        int16_t immed = 0x0;            
+
+        int32_t signExtImm = 0x0;       
+        int32_t zeroExtImm = 0x0;       
+
+        bool isMetBranchCond = false;   
+        u_int32_t branchAddr = 0x0;     
+
+        u_int32_t jumpAddr = 0x0;       
+    }
 };
 
 class Counter {
@@ -129,6 +151,8 @@ private:
     
         fclose(fp); 
     }
+
+    
 
     void fetch() {   
         inst = MEMORY[PC];
@@ -375,10 +399,12 @@ private:
         case SLTI:
             REG_MEMORY[rt] = 
                 (int32_t)REG_MEMORY[rs] < signExtImm;
+            break;
         
         case SLTIU:
             REG_MEMORY[rt] = 
                 REG_MEMORY[rs] < (u_int32_t)signExtImm;
+            break;
 
         // PC = PC + 4 + BranchAddr
         // BranchAddr = signExtImm << 2
@@ -502,6 +528,7 @@ private:
         case 'J':
             if (opcode == J || opcode == JR || opcode == JAL)
                 printf(", address: 0x%X\n", jumpAddr);
+                break;
 
         default:
             printf("\n");
@@ -516,22 +543,26 @@ private:
         case 'R':
             printf("(rs) $%d: 0x%08X, ", rs, REG_MEMORY[rs]);
             printf("(rt) $%d: 0x%08X, ", rt, REG_MEMORY[rt]);
-            printf("(rd) $%d: 0x%08X, ", rd, REG_MEMORY[rd]);
+            printf("(rd) $%d: 0x%08X", rd, REG_MEMORY[rd]);
             break;
 
         case 'I':
             printf("(rs) $%d: 0x%08X, ", rs, REG_MEMORY[rs]);
-            printf("(rt) $%d: 0x%08X, ", rt, REG_MEMORY[rt]);
+            printf("(rt) $%d: 0x%08X", rt, REG_MEMORY[rt]);
             break;
 
         case 'J':
             break;
         }
 
-        printf("Updated PC: 0x%08X\n", PC);
-        printf("=========================\n");
+        printf("\n");
     
         return;
+    }
+
+    void showPcAfterWriteBack() {
+        printf("[Writeback] Updated PC: 0x%08X\n", PC);
+        printf("=========================\n");
     }
 
     // about counting
@@ -571,11 +602,14 @@ public:
             showInstructorAfterDecode();
 
             execute();
-            accessMemory();
-            writeback();
             showStatusAfterExecInst();
 
+            accessMemory();
+            writeback();
+            showPcAfterWriteBack();
+
             updateCounter();
+            initInstructor();
         }
 
         showCounterAfterExecProgram();
@@ -583,7 +617,11 @@ public:
 };
 
 int main() {
-    Simulator s("/mnt/c/Users/deblu/CAMP/new_lab3/test_prog/simple3.bin");
+    // Laptop
+    // Simulator s("/mnt/c/Users/deblu/CAMP/new_lab3/test_prog/simple3.bin");
+
+    // Home
+    Simulator s("/mnt/c/Users/32184893/CAMP-2022/new_lab3/test_prog/simple2.bin");
     s.run();
 
     return 0;
