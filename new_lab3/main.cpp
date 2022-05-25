@@ -383,15 +383,12 @@ private:
         // PC = PC + 4 + BranchAddr
         // BranchAddr = signExtImm << 2
         case BEQ:
-            if (isMetBranchCond = (REG_MEMORY[rs] == REG_MEMORY[rt])) {
-                PC = PC + 4 + (immed << 2);
-            }
+            isMetBranchCond = (REG_MEMORY[rs] == REG_MEMORY[rt]);
             break;
 
         case BNE:
-            if (isMetBranchCond = (REG_MEMORY[rs] != REG_MEMORY[rt])) {
-                PC = PC + 4 + (immed << 2);
-            }
+            isMetBranchCond = (REG_MEMORY[rs] != REG_MEMORY[rt]) ||
+                            (REG_MEMORY[rs] != 0x0);
             break;
         }
 
@@ -436,13 +433,14 @@ private:
         }
 
         if (opcode == J || opcode == JAL) {
-            PC = ((PC + 4) & 0xf0000000) | (jumpAddr << 2);
+            PC = (PC & 0xf0000000) | (jumpAddr << 2);
             return;
         }
 
         // if "Condition" meets in BNE, BEQ inst
         if (isMetBranchCond) {
-            PC += signExtImm << 2;
+            //PC = PC + 4 + (signExtImm << 2);
+            PC = (PC & 0xf0000000) | (signExtImm << 2);
             isMetBranchCond = false;
             return;
         }
@@ -567,15 +565,15 @@ public:
 
         while (PC != 0xFFFFFFFF) {
             fetch();
-            //showInstructorAfterFetch();
+            showInstructorAfterFetch();
 
             decode();
-            //showInstructorAfterDecode();
+            showInstructorAfterDecode();
 
             execute();
             accessMemory();
             writeback();
-            //showStatusAfterExecInst();
+            showStatusAfterExecInst();
 
             updateCounter();
         }
