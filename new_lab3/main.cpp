@@ -1,16 +1,3 @@
-/******************
- * 22일 토요일 한 일
- * C 코드를 C++ 코드로 옮기기로 하였음 -> 코드 관리의 어려움
- * JR 명령어 관련 문제점 발견 : 0xFFFFFFFF를 저장하고 +4를 해서 0x03이 PC에 저장됨
- * 
- * 23일 일요일 할 일
- * execute, access memory, writeback 재구성하기
- * single cycle 제대로 돌아가는지 확인하기
- * 될 때까지 고치기
- * 다 되면 in, out latch 추가하기
- * pipelining 구현하기
-*******************/
-
 // 추가로 구현해야 하는 것
 // * simple3
 // slti, bnez
@@ -621,8 +608,11 @@ int main() {
     // Simulator s("/mnt/c/Users/deblu/CAMP/new_lab3/test_prog/simple3.bin");
 
     // Home
-    Simulator s("/mnt/c/Users/32184893/CAMP-2022/new_lab3/test_prog/simple2.bin");
-    s.run();
+    // Simulator s("/mnt/c/Users/32184893/CAMP-2022/new_lab3/test_prog/simple2.bin");
+
+    // Assam
+    Simulator s("/home/hyeonmin18/CAMP-2022/lab2/test_prog/simple3.bin");
+    s.run();    
 
     return 0;
 }
