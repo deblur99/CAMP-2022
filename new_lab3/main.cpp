@@ -11,10 +11,10 @@
 using namespace std;
 
 // actual size is 0xFFFFFFFF
-u_int32_t INST_MEMORY[0x10000000] = {0xFFFFFFFF, };
+u_int32_t INST_MEMORY[0x1000] = {0xFFFFFFFF, };
 int32_t MEMORY[0x10000000] = {0, };
-                
-u_int32_t REG_MEMORY[0x20] = {0, };
+
+int32_t REG_MEMORY[0x20] = {0, };
 
 enum Register {
     zero = 0x0,                   // always zero ($0)
@@ -126,7 +126,7 @@ private:
         }
         
         int size = 0;
-        while (fread(&MEMORY[4 * size++], 1, sizeof(int), fp) == 4) {
+        while (fread(&INST_MEMORY[4 * size++], 1, sizeof(int), fp) == 4) {
             ;
         }
 
@@ -135,19 +135,17 @@ private:
         printf("=========================\n");
         // print all loaded data from MEMORY array
         for (int i = 0; i < size; i++) {
-            printf("0x%X: 0x%08X\n", 4 * i, MEMORY[4 * i]);
+            printf("0x%X: 0x%08X\n", 4 * i, INST_MEMORY[4 * i]);
         }
         printf("=========================\n");
     
         fclose(fp); 
     }
 
-    
-
     void fetch() {   
-        inst = MEMORY[PC];
+        inst = INST_MEMORY[PC];
 
-        u_int32_t result =          0x00000000;
+        u_int32_t result =        0x00000000;
 
         u_int32_t r1     = inst & 0xFF000000;
         u_int32_t r2     = inst & 0x00FF0000;
@@ -169,7 +167,7 @@ private:
 
         // opcode
         opcode = inst >> 26;
-        inst = inst << 6 >> 6; // strip opcode
+        inst = inst & 0x3FFFFFF; // strip opcode
 
         if (opcode == RTYPE || opcode == MFC0) {
             return decodeRType();
@@ -188,19 +186,19 @@ private:
 
         // rs
         rs = inst >> 21;
-        inst = inst << 11 >> 11; // strip rs
+        inst = inst & 0x1FFFFF; // strip rs
 
         // rt
         rt = inst >> 16;
-        inst = inst << 16 >> 16; // strip rt
+        inst = inst & 0xFFFF; // strip rt
 
         // rd
         rd = inst >> 11;
-        inst = inst << 21 >> 21; // strip rd
+        inst = inst & 0x7FF; // strip rd
 
         // shamt
         shmat = inst >> 6;
-        inst = inst << 26 >> 26; // strip shamt
+        inst = inst & 0x3F; // strip shamt
 
         // funct
         funct = inst;
@@ -211,17 +209,17 @@ private:
 
         // rs
         rs = inst >> 21;
-        inst = inst << 11 >> 11; // strip rs
+        inst = inst & 0x1FFFFF; // strip rs
 
         // rt
         rt = inst >> 16;
-        inst = inst << 16 >> 16; // strip rt
+        inst = inst & 0xFFFF; // strip rt
 
         // immediate
         immed = (int16_t)(inst);
 
         // signExtImm
-        u_int32_t MSB = immed >> 15 << 16;
+        u_int32_t MSB = immed >> 15 << 15;
         u_int32_t result = 0x00000000;
 
         result = result | inst;
@@ -449,14 +447,13 @@ private:
         }
 
         if (opcode == J || opcode == JAL) {
-            PC = (PC & 0xf0000000) | (jumpAddr << 2);
+            PC = 4 * jumpAddr;
             return;
         }
 
         // if "Condition" meets in BNE, BEQ inst
         if (isMetBranchCond) {
-            //PC = PC + 4 + (signExtImm << 2);
-            PC = (PC & 0xf0000000) | (signExtImm << 2);
+            PC = (PC + 4) + (signExtImm << 2);
             isMetBranchCond = false;
             return;
         }
@@ -579,24 +576,24 @@ public:
         loadFile();
     }
 
-    void run() {
+    void run(bool debug) {
         if (fp == NULL) return;
 
         initREG_MEMORY();
 
         while (PC != 0xFFFFFFFF) {
             fetch();
-            showInstructorAfterFetch();
+            if (debug) showInstructorAfterFetch();
 
             decode();
-            showInstructorAfterDecode();
+            if (debug) showInstructorAfterDecode();
 
             execute();
-            showStatusAfterExecInst();
+            if (debug) showStatusAfterExecInst();
 
             accessMemory();
             writeback();
-            showPcAfterWriteBack();
+            if (debug) showPcAfterWriteBack();
 
             updateCounter();
             initInstructor();
@@ -607,8 +604,13 @@ public:
 };
 
 int main() {
+    // optimize output speed
+    cout.sync_with_stdio(0);
+
+    bool doDebug = true;
+
     // Laptop
-    Simulator s("/mnt/c/Users/deblu/CAMP/new_lab3/test_prog/simple3.bin");
+    Simulator s("/mnt/c/Users/deblu/CAMP/new_lab3/test_prog/gcd.bin");
 
     // Home
     // Simulator s("/mnt/c/Users/32184893/CAMP-2022/new_lab3/test_prog/simple2.bin");
@@ -616,7 +618,7 @@ int main() {
     // Assam
     // Simulator s("/home/hyeonmin18/CAMP-2022/lab2/test_prog/simple3.bin");
 
-    s.run();    
+    s.run(false);   
 
     return 0;
 }
