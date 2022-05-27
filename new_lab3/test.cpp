@@ -35,26 +35,27 @@ void test2() {
 }
 
 void test3() {
-    int inst = 0x27bdfff8;
+    u_int32_t inst = 0x34029387;
 
     // opcode
     int opcode = inst >> 26;
     inst = inst & 0x3FFFFFF; // strip opcode
     
     // rs
-    int rs = inst >> 21;
-    inst = inst & 0x1FFFFF; // strip rs
+        u_int32_t rs = inst >> 21;
+        inst = inst & 0x1FFFFF; // strip rs
 
-    // rt
-    int rt = inst >> 16;
-    inst = inst & 0xFFFF; // strip rt
+        // rt
+        u_int32_t rt = inst >> 16;
+        inst = inst & 0xFFFF; // strip rt
 
-    // immediate
-    int immed = (int16_t)(inst);
+        // immediate
+        short immed = inst;
+        printf("immed: 0x%08X\n", immed); // debug
 
-    // signExtImm
-    u_int32_t MSB = immed >> 15;
-    u_int32_t result = 0x00000000;
+        // signExtImm
+        int32_t MSB = immed >> 15 << 15;
+        int32_t result = 0x00000000;
 
         result = result | inst;
         for (int i = 0; i < 16; i++) {
@@ -65,11 +66,11 @@ void test3() {
 
         result = 0x0; // init
 
-        // ZeroExtImm
-        result = (u_int32_t)(immed) | 0x00000000;
+        // ZeroExtImm;
+        result = (int32_t)immed & 0x0000FFFF;
         int zeroExtImm = result;
 
-    printf("rs: 0x%08X, rt: 0x%08X\n", rs, rt);
+    printf("rs: 0x%08X, rt: 0x%08X, immed: 0x%08X, zeroExtImm: 0x%08X\n", rs, rt, immed, zeroExtImm);
 }
 
 void test4() {
@@ -84,8 +85,18 @@ void test4() {
     printf("a: 0x%08X %d\n", PC, PC);
 }
 
+void test5() {
+    int inst = 0x0c000000;
+
+    // opcode
+    int opcode = inst >> 26;
+    inst = inst & 0x03FFFFFF; // strip opcode
+
+    printf("opcode: 0x%08X, address: 0x%08X\n", opcode, inst);
+}
+
 int main() {
-    test4();
+    test5();
     
     return 0;
 }

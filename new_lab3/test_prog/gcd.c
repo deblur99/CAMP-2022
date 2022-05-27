@@ -4,7 +4,7 @@ void main()
 	int b = 0x09387;
 	int res;
 
-	res = gcd (a, b);
+	res = gcd(a, b);
 }
 
 int gcd(int a, int b)

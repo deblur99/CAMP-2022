@@ -167,7 +167,7 @@ private:
 
         // opcode
         opcode = inst >> 26;
-        inst = inst & 0x3FFFFFF; // strip opcode
+        inst = inst & 0x03FFFFFF; // strip opcode
 
         if (opcode == RTYPE || opcode == MFC0) {
             return decodeRType();
@@ -216,11 +216,11 @@ private:
         inst = inst & 0xFFFF; // strip rt
 
         // immediate
-        immed = (int16_t)(inst);
+        immed = inst;
 
         // signExtImm
-        u_int32_t MSB = immed >> 15 << 15;
-        u_int32_t result = 0x00000000;
+        int32_t MSB = immed >> 15 << 15;
+        int32_t result = 0x00000000;
 
         result = result | inst;
         for (int i = 0; i < 16; i++) {
@@ -231,16 +231,14 @@ private:
 
         result = 0x0; // init
 
-        // ZeroExtImm
-        result = (u_int32_t)(immed) | 0x00000000;
+        // ZeroExtImm;
+        result = (int32_t)immed & 0x0000FFFF;
         zeroExtImm = result;
     }
 
     void decodeJType() {
         optype = 'J';
-
-        // address
-        jumpAddr = inst; // rest
+        jumpAddr = inst;
     }
 
     void execute() {
@@ -607,10 +605,10 @@ int main() {
     // optimize output speed
     cout.sync_with_stdio(0);
 
-    bool doDebug = true;
+    bool doDebug = false;
 
     // Laptop
-    Simulator s("/mnt/c/Users/deblu/CAMP/new_lab3/test_prog/gcd.bin");
+    Simulator s("/mnt/c/Users/deblu/CAMP/new_lab3/test_prog/input4.bin");
 
     // Home
     // Simulator s("/mnt/c/Users/32184893/CAMP-2022/new_lab3/test_prog/simple2.bin");

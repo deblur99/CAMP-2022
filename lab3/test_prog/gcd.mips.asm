@@ -15,7 +15,7 @@ Disassembly of section .text:
   1c:	afc2001c 	sw	v0,28(s8)
   20:	8fc40018 	lw	a0,24(s8)
   24:	8fc5001c 	lw	a1,28(s8)
-  28:	0c000000 	jal	0 <main>
+  28:	0c000013 	jal	4c <gcd>
   2c:	00000000 	nop
   30:	afc20020 	sw	v0,32(s8)
   34:	03c0e821 	move	sp,s8
@@ -52,7 +52,7 @@ Disassembly of section .text:
   a8:	00621023 	subu	v0,v1,v0
   ac:	00402021 	move	a0,v0
   b0:	8fc50024 	lw	a1,36(s8)
-  b4:	0c000000 	jal	0 <main>
+  b4:	0c000013 	jal	4c <gcd>
   b8:	00000000 	nop
   bc:	08000039 	j	e4 <gcd+0x98>
   c0:	00000000 	nop
@@ -62,7 +62,7 @@ Disassembly of section .text:
   d0:	00621023 	subu	v0,v1,v0
   d4:	00402021 	move	a0,v0
   d8:	8fc50020 	lw	a1,32(s8)
-  dc:	0c000000 	jal	0 <main>
+  dc:	0c000013 	jal	4c <gcd>
   e0:	00000000 	nop
   e4:	03c0e821 	move	sp,s8
   e8:	8fbf001c 	lw	ra,28(sp)
