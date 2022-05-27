@@ -10,7 +10,10 @@
 
 using namespace std;
 
-int32_t MEMORY[0x10000000] = {0, }; // actual size is 0xFFFFFFFF
+// actual size is 0xFFFFFFFF
+u_int32_t INST_MEMORY[0x10000000] = {0xFFFFFFFF, };
+int32_t MEMORY[0x10000000] = {0, };
+                
 u_int32_t REG_MEMORY[0x20] = {0, };
 
 enum Register {
@@ -605,13 +608,14 @@ public:
 
 int main() {
     // Laptop
-    // Simulator s("/mnt/c/Users/deblu/CAMP/new_lab3/test_prog/simple3.bin");
+    Simulator s("/mnt/c/Users/deblu/CAMP/new_lab3/test_prog/simple3.bin");
 
     // Home
     // Simulator s("/mnt/c/Users/32184893/CAMP-2022/new_lab3/test_prog/simple2.bin");
 
     // Assam
-    Simulator s("/home/hyeonmin18/CAMP-2022/lab2/test_prog/simple3.bin");
+    // Simulator s("/home/hyeonmin18/CAMP-2022/lab2/test_prog/simple3.bin");
+
     s.run();    
 
     return 0;
