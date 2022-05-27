@@ -277,7 +277,7 @@ private:
 
             case SUBU:
                 REG_MEMORY[rd] =  
-                    REG_MEMORY[rs] - (u_int32_t)(REG_MEMORY[rt]); 
+                    (u_int32_t)(REG_MEMORY[rs] - REG_MEMORY[rt]); 
                 break;
 
             // R[rd] = R[rs] * R[rt]
@@ -365,13 +365,13 @@ private:
         // rs가 가리키는 레지스터에 저장되어 있는 값 가져온다.
         // ex) rs가 0x11를 가리키면 0 + 0x11번째, 즉 17번째 레지스터에 저장된 값을 가져온다.
             REG_MEMORY[rt] = 
-                REG_MEMORY[rs] + signExtImm;    
+                REG_MEMORY[rs] + immed;    
             break;
 
         case ADDIU:
         // R[rt] = R[rs] + SignExtImm
             REG_MEMORY[rt] = 
-                REG_MEMORY[rs] + (u_int32_t)(signExtImm);
+                REG_MEMORY[rs] + immed;
             break;
 
         case ANDI:
@@ -498,18 +498,18 @@ private:
         printf("optype: %c, opcode: 0x%X", optype, opcode);
 
         if (optype == 'R' || optype == 'I') {
-            printf(", rs: 0x%X, rt: 0x%X", rs, rt);
+            printf(", rs: 0x%X (%d), rt: 0x%X (%d)", rs, rs, rt, rt);
         }
 
         switch (optype)
         {
         case 'R':
-            printf(", rd: 0x%X, shamt: 0x%X, funct: 0x%X\n",
-                    rd, shmat, funct);
+            printf(", rd: 0x%X (%d), shamt: 0x%X, funct: 0x%X\n",
+                    rd, rd, shmat, funct);
             break;
 
         case 'I':
-            printf(", immediate: 0x%X\n", immed);
+            printf(", immediate: 0x%X (%d)\n", immed, immed);
             break;
 
         case 'J':
@@ -528,14 +528,14 @@ private:
 
         switch (optype) {
         case 'R':
-            printf("(rs) $%d: 0x%08X, ", rs, REG_MEMORY[rs]);
-            printf("(rt) $%d: 0x%08X, ", rt, REG_MEMORY[rt]);
-            printf("(rd) $%d: 0x%08X", rd, REG_MEMORY[rd]);
+            printf("(rs) $%d: 0x%08X (%d), ", rs, REG_MEMORY[rs], REG_MEMORY[rs]);
+            printf("(rt) $%d: 0x%08X (%d), ", rt, REG_MEMORY[rt], REG_MEMORY[rt]);
+            printf("(rd) $%d: 0x%08X (%d)", rd, REG_MEMORY[rd], REG_MEMORY[rd]);
             break;
 
         case 'I':
-            printf("(rs) $%d: 0x%08X, ", rs, REG_MEMORY[rs]);
-            printf("(rt) $%d: 0x%08X", rt, REG_MEMORY[rt]);
+            printf("(rs) $%d: 0x%08X (%d), ", rs, REG_MEMORY[rs], REG_MEMORY[rs]);
+            printf("(rt) $%d: 0x%08X (%d)", rt, REG_MEMORY[rt], REG_MEMORY[rt]);
             break;
 
         case 'J':
@@ -618,7 +618,7 @@ int main() {
     // Assam
     // Simulator s("/home/hyeonmin18/CAMP-2022/lab2/test_prog/simple3.bin");
 
-    s.run(false);   
+    s.run(doDebug);   
 
     return 0;
 }
