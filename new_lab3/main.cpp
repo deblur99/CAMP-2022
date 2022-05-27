@@ -1,20 +1,85 @@
-// 추가로 구현해야 하는 것
-// * simple3
-// slti, bnez
-// * simple4
-// bne (잘 되는지?)
-// j (잘 되는지 봐야함)
-// * 
+// 안 돌아가는 프로그램 목록
+// - simple4
+// - gcd
+// - fib
 
-#include "defines.h"
+#include <stdio.h>
+#include <string>
+#include <vector>
+#include <cstdlib>
+#include <sys/types.h>
+
+#define MEMORY_SIZE         0xFFFFFFFF // original size is 0xFFFFFFFF
+#define INST_MEMORY_SIZE    0x10000000
+#define REG_MEMORY_SIZE     0x20       // values in each $0~$31 registers
+
+#define OPCODE_MASK     0x000000FF
+
+// opcode list (from MIPS Green Sheet)
+// nop
+#define EMPTY           0x00000000
+
+// R type OPCODE is 0 (except MFC0. its opcode is 0x10)
+#define RTYPE           0x0
+
+// R type funct
+#define MOVE            0x21
+
+#define ADD             0x20 
+#define ADDU            0x21
+#define AND             0x24
+#define JR              0x8
+#define NOR             0x27
+#define OR              0x25
+#define SLT             0x2A
+#define SLTU            0x2B
+#define SLL             0x0
+#define SRL             0x2
+#define SUB             0x22
+#define SUBU            0x23
+#define DIV             0x1A
+#define DIVU            0x1B
+#define MFHI            0x10
+#define MFLO            0x12
+#define MFC0            0x10    // (except) OPCODE is 0x10. funct is 0x0
+#define MULT            0x18
+#define MULTU           0x19
+#define SRA             0x3
+
+// I type opcode
+#define ADDI            0x8
+#define ADDIU           0x9
+#define ANDI            0xC
+#define BEQ             0x4
+#define BNE             0x5
+#define LBU             0x24
+#define LHU             0x25
+#define LL              0x30
+#define LUI             0xF
+#define LW              0x23
+#define ORI             0xD
+#define SLTI            0xA
+#define SLTIU           0xB
+#define SB              0x28
+#define SC              0x38
+#define SH              0x29
+#define SW              0x2B
+#define LWCL            0x31
+#define LDCL            0x35
+#define SWCL            0x39
+#define SDCL            0x3D
+
+// J type opcode
+#define J               0x2
+#define JAL             0x3
 
 using namespace std;
 
 // actual size is 0xFFFFFFFF
-u_int32_t INST_MEMORY[0x1000] = {0xFFFFFFFF, };
-int32_t MEMORY[0x10000000] = {0, };
+int32_t *MEMORY;
+u_int32_t *INST_MEMORY;
 
-int32_t REG_MEMORY[0x20] = {0, };
+int32_t REG_MEMORY[REG_MEMORY_SIZE] = {0, };
 
 enum Register {
     zero = 0x0,                   // always zero ($0)
@@ -110,6 +175,20 @@ private:
 
     u_int32_t PC = 0x0;
     u_int32_t inst = 0x0;
+
+    void initMEMORY() {
+        MEMORY = new int32_t[(u_int64_t)MEMORY_SIZE];
+        for (int i = 0; i < (u_int64_t)MEMORY_SIZE; i++) {
+            MEMORY[i] = 0x0;
+        }
+    }
+
+    void initINST_MEMORY() {
+        INST_MEMORY = new u_int32_t[(u_int64_t)INST_MEMORY_SIZE];
+        for (int i = 0; i < (u_int64_t)INST_MEMORY_SIZE; i++) {
+            INST_MEMORY[i] = 0xFFFFFFFF;
+        }
+    }
 
     void initREG_MEMORY() {
         REG_MEMORY[sp] = 0x1000000;
@@ -570,14 +649,21 @@ private:
 
 public:
     Simulator(string filename) {
+        initMEMORY();
+        initINST_MEMORY();
+        initREG_MEMORY();
+
         _filename = filename;
         loadFile();
     }
 
+    ~Simulator() {
+        delete MEMORY;
+        delete INST_MEMORY;
+    }
+
     void run(bool debug) {
         if (fp == NULL) return;
-
-        initREG_MEMORY();
 
         while (PC != 0xFFFFFFFF) {
             fetch();
@@ -602,21 +688,18 @@ public:
 };
 
 int main() {
-    // optimize output speed
-    cout.sync_with_stdio(0);
-
     bool doDebug = false;
 
     // Laptop
-    Simulator s("/mnt/c/Users/deblu/CAMP/new_lab3/test_prog/input4.bin");
+    // Simulator s("/mnt/c/Users/deblu/CAMP/new_lab3/test_prog/input4.bin");
 
     // Home
     // Simulator s("/mnt/c/Users/32184893/CAMP-2022/new_lab3/test_prog/simple2.bin");
 
     // Assam
-    // Simulator s("/home/hyeonmin18/CAMP-2022/lab2/test_prog/simple3.bin");
+    Simulator s("/home/hyeonmin18/CAMP-2022/new_lab3/test_prog/simple4.bin");
 
-    s.run(doDebug);   
+    s.run(doDebug);
 
     return 0;
 }

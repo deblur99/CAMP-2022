@@ -12,6 +12,7 @@
         "decode.h": "c",
         "init.h": "c",
         "mem_access.h": "c",
-        "functional": "c"
+        "functional": "c",
+        "iostream": "cpp"
     }
 }
