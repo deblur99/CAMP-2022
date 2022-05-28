@@ -1,7 +1,3 @@
-#include <stdio.h>
-
-int gcd(int a, int b);
-
 void main()
 {
 	int a = 0x1298;
@@ -9,8 +5,6 @@ void main()
 	int res;
 
 	res = gcd(a, b);
-
-	printf("%d\n", res);
 }
 
 int gcd(int a, int b)
