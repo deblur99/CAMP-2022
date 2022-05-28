@@ -125,28 +125,6 @@ protected:
     u_int32_t branchAddr = 0x0;     // for Branch (beq, bne)
 
     u_int32_t jumpAddr = 0x0;       // for Jump (j, jal)
-
-    void initInstructor() {
-        char optype = '\0';
-        u_int32_t opcode = 0x0;         
-
-        u_int32_t rs = 0x0;             
-        u_int32_t rt = 0x0;             
-        u_int32_t rd = 0x0;             
-
-        u_int32_t shmat = 0x0;          
-        u_int32_t funct = 0x0;          
-
-        int16_t immed = 0x0;            
-
-        int32_t signExtImm = 0x0;       
-        int32_t zeroExtImm = 0x0;       
-
-        bool isMetBranchCond = false;   
-        u_int32_t branchAddr = 0x0;     
-
-        u_int32_t jumpAddr = 0x0;       
-    }
 };
 
 class Counter {
@@ -168,8 +146,10 @@ private:
     string _filename;
     int amount = 0;
 
-    u_int32_t PC = 0x0;
+    u_int32_t PC = 0x0 - 4;
     u_int32_t inst = 0x0;
+
+    int32_t writeValIntoMemory = 0x0; // for writeback stage
 
     void initMEMORY() {
         MEMORY = new int32_t[(u_int64_t)MEMORY_SIZE];
@@ -216,7 +196,29 @@ private:
         fclose(fp); 
     }
 
-    void fetch() {   
+    void updatePC() {
+        if (optype == 'R' && funct == JR) {
+            PC = REG_MEMORY[rs];
+            return;
+        }
+
+        if (opcode == J || opcode == JAL) {
+            PC = 4 * jumpAddr;
+            return;
+        }
+
+        // if "Condition" meets in BNE, BEQ inst
+        if (isMetBranchCond) {
+            PC = (PC + 4) + (signExtImm << 2);
+            isMetBranchCond = false;
+            return;
+        }
+
+        // the rest case, generally PC gets plus 4
+        PC += 4;
+    }
+
+    void fetch() {
         inst = INST_MEMORY[PC];
 
         u_int32_t result =        0x00000000;
@@ -332,83 +334,83 @@ private:
         if (opcode == RTYPE) {
             switch (funct) {
             case MOVE:
-                REG_MEMORY[rd] = REG_MEMORY[rs];
+                writeValIntoMemory = REG_MEMORY[rs];
                 break;
 
             // R[rd] = R[rs] + R[rt]
             case ADD:
-                REG_MEMORY[rd] =
+                writeValIntoMemory =
                     REG_MEMORY[rs] + REG_MEMORY[rt];     
                 break;
 
             // R[rd] = R[rs] - R[rt]
             case SUB:
-                REG_MEMORY[rd] = 
+                writeValIntoMemory = 
                     REG_MEMORY[rs] - REG_MEMORY[rt]; 
                 break;
 
             case SUBU:
-                REG_MEMORY[rd] =  
+                writeValIntoMemory =  
                     (u_int32_t)(REG_MEMORY[rs] - REG_MEMORY[rt]); 
                 break;
 
             // R[rd] = R[rs] * R[rt]
             case MULT:
-                REG_MEMORY[rd] = 
+                writeValIntoMemory = 
                     REG_MEMORY[rs] * REG_MEMORY[rt]; 
                 break;
 
             case MULTU:
-                REG_MEMORY[rd] = 
+                writeValIntoMemory = 
                     REG_MEMORY[rs] * (u_int32_t)(REG_MEMORY[rt]); 
                 break;
 
             // R[rd] = R[rs] / R[rt]
             case DIV:
-                REG_MEMORY[rd] = 
+                writeValIntoMemory = 
                     REG_MEMORY[rs] / REG_MEMORY[rt]; 
                 break;
 
             case DIVU:
-                REG_MEMORY[rd] = 
+                writeValIntoMemory = 
                     REG_MEMORY[rs] / (u_int32_t)(REG_MEMORY[rt]); 
                 break;
 
             case AND:
-                REG_MEMORY[rd] = 
+                writeValIntoMemory = 
                     REG_MEMORY[rs] & REG_MEMORY[rt];
                 break;
 
             case NOR:
-                REG_MEMORY[rd] = 
+                writeValIntoMemory = 
                     ~(REG_MEMORY[rs] | REG_MEMORY[rt]);
                 break;
 
             case OR:
-                REG_MEMORY[rd] = 
+                writeValIntoMemory = 
                     REG_MEMORY[rs] | REG_MEMORY[rt];
                 break;
 
             // R[rd] = (R[rs] < R[rt]) ? 1 : 0
             case SLT:
-                REG_MEMORY[rd] = 
+                writeValIntoMemory = 
                     REG_MEMORY[rs] < REG_MEMORY[rt];
                 break;
 
             // R[rd] = (R[rs] < R[rt]) ? 1 : 0
             case SLTU:
-                REG_MEMORY[rd] = 
+                writeValIntoMemory = 
                     (u_int32_t)(REG_MEMORY[rs]) < (u_int32_t)(REG_MEMORY[rt]);
                 break;
 
             // R[rd] = R[rt] << shamt
             case SLL:
-                REG_MEMORY[rd] = REG_MEMORY[rt] << shmat;
+                writeValIntoMemory = REG_MEMORY[rt] << shmat;
                 break;
 
             // R[rd] = R[rt] >> shamt
             case SRL:
-                REG_MEMORY[rd] = REG_MEMORY[rt] >> shmat;
+                writeValIntoMemory = REG_MEMORY[rt] >> shmat;
                 break;
 
             case JR:
@@ -421,14 +423,11 @@ private:
     }
 
     void executeIType() {
+        // postpone to the next step : access memory
         switch (opcode) {
         case LW:
-        // R[rt] = M[R[rs]+SignExtImm]
-            REG_MEMORY[rt] = 
-                MEMORY[REG_MEMORY[rs] + signExtImm];
             break;
 
-        // postpone to the next step : access memory
         case SW:
             break;
 
@@ -436,33 +435,33 @@ private:
         // R[rt] = R[rs] + SignExtImm
         // rs가 가리키는 레지스터에 저장되어 있는 값 가져온다.
         // ex) rs가 0x11를 가리키면 0 + 0x11번째, 즉 17번째 레지스터에 저장된 값을 가져온다.
-            REG_MEMORY[rt] = 
+            writeValIntoMemory = 
                 REG_MEMORY[rs] + immed;    
             break;
 
         case ADDIU:
         // R[rt] = R[rs] + SignExtImm
-            REG_MEMORY[rt] = 
+            writeValIntoMemory = 
                 REG_MEMORY[rs] + immed;
             break;
 
         case ANDI:
-            REG_MEMORY[rt] = 
+            writeValIntoMemory = 
                 REG_MEMORY[rs] & zeroExtImm;
             break;
 
         case ORI:
-            REG_MEMORY[rt] = 
+            writeValIntoMemory = 
                 REG_MEMORY[rs] | zeroExtImm;
             break;
 
         case SLTI:
-            REG_MEMORY[rt] = 
+            writeValIntoMemory = 
                 (int32_t)REG_MEMORY[rs] < signExtImm;
             break;
         
         case SLTIU:
-            REG_MEMORY[rt] = 
+            writeValIntoMemory = 
                 REG_MEMORY[rs] < (u_int32_t)signExtImm;
             break;
 
@@ -489,7 +488,7 @@ private:
             break;
 
         case JAL:
-            REG_MEMORY[ra] = PC + 0x8;  // R[31] = PC + 8
+            writeValIntoMemory = PC + 0x8;  // R[31] = PC + 8
             break;
         }
 
@@ -505,7 +504,7 @@ private:
     }
 
     void readFromMemory() {
-        REG_MEMORY[rt] = MEMORY[REG_MEMORY[rs] + signExtImm];
+        writeValIntoMemory = MEMORY[REG_MEMORY[rs] + signExtImm];
     }
 
     void writeIntoMemory() {
@@ -513,25 +512,34 @@ private:
     }
 
     void writeback() {
-        if (optype == 'R' && funct == JR) {
-            PC = REG_MEMORY[rs];
-            return;
-        }
+        switch (optype) {
+        case 'R':
+            return writebackRType();
 
-        if (opcode == J || opcode == JAL) {
-            PC = 4 * jumpAddr;
-            return;
-        }
+        case 'I':
+            return writebackIType();
 
-        // if "Condition" meets in BNE, BEQ inst
-        if (isMetBranchCond) {
-            PC = (PC + 4) + (signExtImm << 2);
-            isMetBranchCond = false;
-            return;
+        case 'J':
+            return writebackJType();
         }
+    }
 
-        // the rest case, generally PC gets plus 4
-        PC += 4;
+    void writebackRType() {
+        if (opcode == RTYPE && funct != JR) {
+            REG_MEMORY[rd] = writeValIntoMemory;
+        }
+    }
+
+    void writebackIType() {
+        if (opcode != SW && opcode != BEQ && opcode != BNE)
+            REG_MEMORY[rt] = writeValIntoMemory;
+    }
+
+    // JAL의 경우 execute 단계에서 ra 레지스터에 현재 PC값 + 8 저장하고,
+    // writeback 단계에서 JumpAddr 저장한다.
+    void writebackJType() {
+        if (opcode == JAL)
+            REG_MEMORY[ra] = writeValIntoMemory;
     }
 
     void updateCounter() {
@@ -559,6 +567,10 @@ private:
             executedJTypeInst++;
             break;
         }   
+    }
+
+    void showPcAfterUpdating() {
+        printf("Updated PC: 0x%08X\n", PC);
     }
 
     void showInstructorAfterFetch() {
@@ -614,14 +626,9 @@ private:
             break;
         }
 
-        printf("\n");
+        printf("\n=========================\n");
     
         return;
-    }
-
-    void showPcAfterWriteBack() {
-        printf("[Writeback] Updated PC: 0x%08X\n", PC);
-        printf("=========================\n");
     }
 
     // about counting
@@ -662,6 +669,7 @@ public:
 
         while (PC != 0xFFFFFFFF) {
             fetch();
+            if (debug) showPcAfterUpdating();
             if (debug) showInstructorAfterFetch();
 
             decode();
@@ -672,10 +680,10 @@ public:
 
             accessMemory();
             writeback();
-            if (debug) showPcAfterWriteBack();
 
+            updatePC();
+            
             updateCounter();
-            initInstructor();
         }
 
         showCounterAfterExecProgram();
