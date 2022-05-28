@@ -1,8 +1,3 @@
-// 안 돌아가는 프로그램 목록
-// - simple4
-// - gcd
-// - fib
-
 #include <stdio.h>
 #include <string>
 #include <vector>
