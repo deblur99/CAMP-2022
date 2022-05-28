@@ -179,7 +179,7 @@ private:
     void initMEMORY() {
         MEMORY = new int32_t[(u_int64_t)MEMORY_SIZE];
         for (int i = 0; i < (u_int64_t)MEMORY_SIZE; i++) {
-            MEMORY[i] = 0x0;
+            MEMORY[i] = 0xFFFFFFFF;
         }
     }
 
@@ -478,8 +478,8 @@ private:
             break;
 
         case BNE:
-            isMetBranchCond = (REG_MEMORY[rs] != REG_MEMORY[rt]) ||
-                            (REG_MEMORY[rs] != 0x0);
+            isMetBranchCond = (REG_MEMORY[rs] != REG_MEMORY[rt]);
+                                //|| (REG_MEMORY[rs] != 0x0);
             break;
         }
 
@@ -510,11 +510,11 @@ private:
     }
 
     void readFromMemory() {
-        REG_MEMORY[rt] = MEMORY[rs + signExtImm];
+        REG_MEMORY[rt] = MEMORY[REG_MEMORY[rs] + signExtImm];
     }
 
     void writeIntoMemory() {
-        MEMORY[rs + signExtImm] = REG_MEMORY[rt];
+        MEMORY[REG_MEMORY[rs] + signExtImm] = REG_MEMORY[rt];
     }
 
     void writeback() {
@@ -697,7 +697,7 @@ int main() {
     // Simulator s("/mnt/c/Users/32184893/CAMP-2022/new_lab3/test_prog/simple2.bin");
 
     // Assam
-    Simulator s("/home/hyeonmin18/CAMP-2022/new_lab3/test_prog/simple4.bin");
+    Simulator s("/home/hyeonmin18/CAMP-2022/new_lab3/test_prog/gcd.bin");
 
     s.run(doDebug);
 
