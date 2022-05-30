@@ -969,15 +969,7 @@ public:
 int main() {
     bool doDebug = false;
 
-    // Laptop
-    // Simulator s("/mnt/c/Users/deblu/CAMP/lab3/test_prog/input4.bin");
-
-    // Home
-    // Simulator s("/mnt/c/Users/32184893/CAMP-2022/lab3/test_prog/simple2.bin");
-
-    // Assam
     Simulator s("/home/hyeonmin18/CAMP-2022/lab3/test_prog/input4.bin");
-
     s.run(doDebug);
 
     return 0;
