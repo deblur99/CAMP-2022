@@ -140,6 +140,282 @@ protected:
     u_int32_t takenBranches = 0;
 };
 
+enum LatchSpecifier {
+    IF_ID = 0,
+    ID_EXE,
+    EX_MEM,
+    MEM_WB
+};
+
+class LatchFieldData {
+private:
+    bool IN_VALID;
+    bool OUT_VALID;
+
+    // All latches
+    u_int32_t   _NPC =          0x0;
+    
+    // IF/ID
+    u_int32_t   _IR =           0x0;
+
+    // ID/EXE, EX/MEM, MEM/WB
+    u_int32_t   _rd =           0x0;
+
+    // ID/EXE, EX/MEM
+    int32_t     _ReadData2 =    0x0;
+
+    // ID/EXE
+    int32_t     _ReadData1 =    0x0;
+    u_int32_t   _opcode =       0x0;
+    u_int32_t   _rs =           0x0;
+    u_int32_t   _rt =           0x0;
+    u_int32_t   _shamt =        0x0;
+    u_int32_t   _funct =        0x0;
+    int32_t     _immed =        0x0;
+    
+    // EX/MEM, MEM/WB
+    int32_t     _ALU_Result =   0x0;
+
+    // MEM/WB
+    int32_t     _ReadData   =   0x0; // for LW inst.
+
+public:
+    // IF/ID
+    LatchFieldData(
+        int type,
+        u_int32_t NPC,
+        u_int32_t IR
+    ) {
+        if (type == IF_ID) {
+            _NPC = _NPC;
+            _IR = IR;
+            IN_VALID = true;
+            OUT_VALID = true;
+        }
+    }
+
+    // ID/EXE
+    LatchFieldData(
+        int type,
+        int32_t ReadData1,
+        int32_t ReadData2,
+        u_int32_t opcode,
+        u_int32_t rs,
+        u_int32_t rt,
+        u_int32_t rd,
+        u_int32_t shamt,
+        u_int32_t funct,
+        int32_t immed,
+    ) {
+        if (type == ID_EXE) {
+            _NPC = NPC;
+            _ReadData1 = ReadData1;
+            _ReadData2 = ReadData2;
+            _opcode = opcode;
+            _rt = rt;
+            _rs = rs;
+            _rd = rd;
+            _shamt = shamt;
+            _funct = funct;
+            _immed = immed;
+        }
+
+        IN_VALID = true;
+        OUT_VALID = true;
+    }
+
+    // EX/MEM, MEM/WB
+    LatchFieldData(
+        int type,
+        u_int32_t NPC,
+        int32_t ALU_Result,
+        int32_t ReadData,
+        u_int32_t rd
+    ) {
+        // EX/MEM
+        if (type == EX_MEM) {
+            _NPC = NPC;
+            _ALU_Result = ALU_Result;
+            _ReadData2 = ReadData;
+            _rd = rd;
+        }
+
+        // MEM/WB
+        if (type == MEM_WB) {
+            _NPC = NPC;
+            _ALU_Result = ALU_Result;
+            _ReadData = ReadData;
+            _rd = rd;
+        }
+
+        IN_VALID = true;
+        OUT_VALID = true;
+    }
+
+    getLatchFieldData()
+
+    LatchFieldData getIF_ID_LatchData() {
+        return 
+    }
+}
+
+Latch *l = new Latch(1).makeLatch();
+
+class Latch {
+private:
+    int _type;
+    LatchFieldData *lfData;
+protected:
+    virtual void update() = 0;
+    virtual void clear() = 0;
+    virtual void showStatus() = 0;
+public:
+    Latch(int type) {
+        _type = type;
+        return Latch()
+    }
+
+    Latch* makeLatch() {
+        switch (type)
+        {
+        case IF_ID:
+            return new IF_ID_Latch();
+        
+        case ID_EXE:
+            return new IF_EXE_Latch();
+        
+        case EX_MEM:
+            return new EX_MEM_Latch();
+        
+        case MEM_WB:
+            return new MEM_WB_Latch();
+
+        default:
+            return nullptr;
+        }
+    }
+};
+
+class IF_ID_Latch: public Latch {
+private:
+    u_int32_t _NPC = 0x0;
+    u_int32_t _IR = 0x0;
+
+public:
+    IF_ID_Latch(u_int32_t NPC, u_int32_t IR) {
+        update(NPC, IR);
+    }
+
+    void update(u_int32_t NPC, u_int32_t IR) {
+        _NPC = NPC;
+        _IR = IR;
+    }
+
+    void clear() {
+        _NPC = 0x0;
+        _IR = 0x0;
+    }
+
+    void showStatus() {
+        printf("======================================================\n");
+        printf("IF/ID Latch Status\n");
+        printf("* Next Program Counter:\t0x%08X\n", _NPC);
+        printf("* Current Instruction:\t0x%08X\n", _IR);
+        printf("======================================================\n");
+    }
+};
+
+class ID_EX_Latch: public Latch {
+private:
+    u_int32_t _NPC = 0x0;
+    u_int32_t _ReadData1 = 0x0;
+    u_int32_t _ReadData2 = 0x0;
+    u_int32_t _opcode = 0x0;
+    u_int32_t _rs = 0x0;
+    u_int32_t _rt = 0x0;
+    u_int32_t _rd = 0x0;
+    u_int32_t _shamt = 0x0;
+    u_int32_t _funct = 0x0;
+    u_int32_t _immed = 0x0;
+
+public:
+    ID_EX_Latch(u_int32_t NPC, u_int32_t IR) {
+        update(NPC, IR);
+    }
+
+    void update(u_int32_t NPC, u_int32_t IR) {
+        _NPC = NPC;
+        _IR = IR;
+    }
+
+    void clear() {
+        _NPC = 0x0;
+        _IR = 0x0;
+    }
+
+    void showStatus() {
+        printf("======================================================\n");
+        printf("IF/ID Latch Status\n");
+        printf("======================================================\n");
+    }
+};
+
+class EX_MEM_Latch: public Latch {
+private:
+    u_int32_t _NPC = 0x0;
+    u_int32_t _IR = 0x0;
+
+public:
+    EX_MEM_Latch(u_int32_t NPC, u_int32_t IR) {
+        update(NPC, IR);
+    }
+
+    void update(u_int32_t NPC, u_int32_t IR) {
+        _NPC = NPC;
+        _IR = IR;
+    }
+
+    void clear() {
+        _NPC = 0x0;
+        _IR = 0x0;
+    }
+
+    void showStatus() {
+        printf("======================================================\n");
+        printf("IF/ID Latch Status\n");
+        printf("======================================================\n");
+    }
+};
+
+class MEM_WB_Latch: public Latch {
+private:
+    u_int32_t _NPC = 0x0;
+    u_int32_t _IR = 0x0;
+
+public:
+    MEM_WB_Latch(u_int32_t NPC, u_int32_t IR) {
+        update(NPC, IR);
+    }
+
+    void update(u_int32_t NPC, u_int32_t IR) {
+        _NPC = NPC;
+        _IR = IR;
+    }
+
+    void clear() {
+        _NPC = 0x0;
+        _IR = 0x0;
+    }
+
+    void showStatus() {
+        printf("======================================================\n");
+        printf("IF/ID Latch Status\n");
+        printf("* Next Program Counter:\t0x%08X\n", _NPC);
+        printf("* Current Instruction:\t0x%08X\n", _IR);
+        printf("======================================================\n");
+    }
+};
+
 class Simulator: public Inst, Counter {
 private:
     FILE *fp;
