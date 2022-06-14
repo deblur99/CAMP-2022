@@ -13,6 +13,8 @@
         "init.h": "c",
         "mem_access.h": "c",
         "functional": "c",
-        "iostream": "cpp"
+        "iostream": "cpp",
+        "string": "cpp",
+        "input_data.h": "c"
     }
 }

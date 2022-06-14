@@ -95,8 +95,13 @@ void test5() {
     printf("opcode: 0x%08X, address: 0x%08X\n", opcode, inst);
 }
 
+void test6() {
+    int16_t immed = 0x1;
+    printf("%d 0x%08X\n", (int32_t)(immed) << 16, (int32_t)(immed) << 16);
+}
+
 int main() {
-    test5();
+    test6();
     
     return 0;
 }

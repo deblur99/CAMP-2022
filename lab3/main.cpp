@@ -1,72 +1,6 @@
-#include <stdio.h>
-#include <string>
-#include <vector>
-#include <cstdlib>
-#include <sys/types.h>
-
-#define MEMORY_SIZE         0xFFFFFFFF // original size is 0xFFFFFFFF
-#define INST_MEMORY_SIZE    0x10000000
-#define REG_MEMORY_SIZE     0x20       // values in each $0~$31 registers
-
-#define OPCODE_MASK     0x000000FF
-
-// opcode list (from MIPS Green Sheet)
-// nop
-#define EMPTY           0x00000000
-
-// R type OPCODE is 0 (except MFC0. its opcode is 0x10)
-#define RTYPE           0x0
-
-// R type funct
-#define MOVE            0x21
-
-#define ADD             0x20 
-#define ADDU            0x21
-#define AND             0x24
-#define JR              0x8
-#define NOR             0x27
-#define OR              0x25
-#define SLT             0x2A
-#define SLTU            0x2B
-#define SLL             0x0
-#define SRL             0x2
-#define SUB             0x22
-#define SUBU            0x23
-#define DIV             0x1A
-#define DIVU            0x1B
-#define MFHI            0x10
-#define MFLO            0x12
-#define MFC0            0x10    // (except) OPCODE is 0x10. funct is 0x0
-#define MULT            0x18
-#define MULTU           0x19
-#define SRA             0x3
-
-// I type opcode
-#define ADDI            0x8
-#define ADDIU           0x9
-#define ANDI            0xC
-#define BEQ             0x4
-#define BNE             0x5
-#define LBU             0x24
-#define LHU             0x25
-#define LL              0x30
-#define LUI             0xF
-#define LW              0x23
-#define ORI             0xD
-#define SLTI            0xA
-#define SLTIU           0xB
-#define SB              0x28
-#define SC              0x38
-#define SH              0x29
-#define SW              0x2B
-#define LWCL            0x31
-#define LDCL            0x35
-#define SWCL            0x39
-#define SDCL            0x3D
-
-// J type opcode
-#define J               0x2
-#define JAL             0x3
+#include "./utils/defines.h"
+#include "./utils/inst.h"
+#include "./utils/counter.h"
 
 using namespace std;
 
@@ -76,353 +10,13 @@ u_int32_t *INST_MEMORY;
 
 int32_t REG_MEMORY[REG_MEMORY_SIZE] = {0, };
 
-enum Register {
-    zero = 0x0,                   // always zero ($0)
-    at = 0x1,                     // reserved for assembler ($1)
-    
-    // 1st, 2nd return value registers ($2, $3)
-    v0 = 0x2, v1,                 
-
-    // argument registers for function ($4 ~ $7)
-    a0 = 0x4, a1, a2, a3,         
-
-    // temporary registers ($8 ~ $15)
-    t0 = 0x8, t1, t2, t3, t4, t5, t6, t7,
-
-    // saved temporary registers ($16 ~ $23)
-    s0 = 0x10, s1, s2, s3, s4, s5, s6, s7,
-
-    // temporary registers ($24, $25)
-    t8 = 0x18, t9,          
-
-    // reserved for kernel ($26, $27)
-    k0 = 0x1A, k1,
-
-    gp = 0x1C,                      // global pointer ($28). 0x1C
-    sp = 0x1D,                      // stack pointer ($29). 0x1D
-    fp = 0x1E,                      // frame pointer ($30). 0x1E
-    ra = 0x1F,                      // return address ($31). 0x1F
-};
-
-class Inst {
-protected:
-    char optype;
-    u_int32_t opcode = 0x0;         // for R, I, J type
-
-    u_int32_t rs = 0x0;             // for R, I type          
-    u_int32_t rt = 0x0;             // for R, I type
-    u_int32_t rd = 0x0;             // for R type
-
-    u_int32_t shmat = 0x0;          // for R type
-    u_int32_t funct = 0x0;          // for R type
-
-    int16_t immed = 0x0;            // for I type
-
-    int32_t signExtImm = 0x0;       // for I type (addi, addiu, lbu, lhu, lw, slti, sltiu, sb, sc, sh, sw, lwcu, ldcl, swcl, sdcl)
-    int32_t zeroExtImm = 0x0;       // for I type (andi, ori)
-
-    bool isMetBranchCond = false;   // for Branch (beq, bne)
-    u_int32_t branchAddr = 0x0;     // for Branch (beq, bne)
-
-    u_int32_t jumpAddr = 0x0;       // for Jump (j, jal)
-};
-
-class Counter {
-protected:
-    int32_t returnValue = 0;
-
-    u_int32_t executedInst = 0;
-    u_int32_t executedRTypeInst = 0;
-    u_int32_t executedITypeInst = 0;
-    u_int32_t executedJTypeInst = 0;
-    u_int32_t memoryAccessInst = 0;
-
-    u_int32_t takenBranches = 0;
-};
-
-enum LatchSpecifier {
-    IF_ID = 0,
-    ID_EXE,
-    EX_MEM,
-    MEM_WB
-};
-
-class LatchFieldData {
-private:
-    bool IN_VALID;
-    bool OUT_VALID;
-
-    // All latches
-    u_int32_t   _NPC =          0x0;
-    
-    // IF/ID
-    u_int32_t   _IR =           0x0;
-
-    // ID/EXE, EX/MEM, MEM/WB
-    u_int32_t   _rd =           0x0;
-
-    // ID/EXE, EX/MEM
-    int32_t     _ReadData2 =    0x0;
-
-    // ID/EXE
-    int32_t     _ReadData1 =    0x0;
-    u_int32_t   _opcode =       0x0;
-    u_int32_t   _rs =           0x0;
-    u_int32_t   _rt =           0x0;
-    u_int32_t   _shamt =        0x0;
-    u_int32_t   _funct =        0x0;
-    int32_t     _immed =        0x0;
-    
-    // EX/MEM, MEM/WB
-    int32_t     _ALU_Result =   0x0;
-
-    // MEM/WB
-    int32_t     _ReadData   =   0x0; // for LW inst.
-
-public:
-    // IF/ID
-    LatchFieldData(
-        int type,
-        u_int32_t NPC,
-        u_int32_t IR
-    ) {
-        if (type == IF_ID) {
-            _NPC = _NPC;
-            _IR = IR;
-            IN_VALID = true;
-            OUT_VALID = true;
-        }
-    }
-
-    // ID/EXE
-    LatchFieldData(
-        int type,
-        int32_t ReadData1,
-        int32_t ReadData2,
-        u_int32_t opcode,
-        u_int32_t rs,
-        u_int32_t rt,
-        u_int32_t rd,
-        u_int32_t shamt,
-        u_int32_t funct,
-        int32_t immed,
-    ) {
-        if (type == ID_EXE) {
-            _NPC = NPC;
-            _ReadData1 = ReadData1;
-            _ReadData2 = ReadData2;
-            _opcode = opcode;
-            _rt = rt;
-            _rs = rs;
-            _rd = rd;
-            _shamt = shamt;
-            _funct = funct;
-            _immed = immed;
-        }
-
-        IN_VALID = true;
-        OUT_VALID = true;
-    }
-
-    // EX/MEM, MEM/WB
-    LatchFieldData(
-        int type,
-        u_int32_t NPC,
-        int32_t ALU_Result,
-        int32_t ReadData,
-        u_int32_t rd
-    ) {
-        // EX/MEM
-        if (type == EX_MEM) {
-            _NPC = NPC;
-            _ALU_Result = ALU_Result;
-            _ReadData2 = ReadData;
-            _rd = rd;
-        }
-
-        // MEM/WB
-        if (type == MEM_WB) {
-            _NPC = NPC;
-            _ALU_Result = ALU_Result;
-            _ReadData = ReadData;
-            _rd = rd;
-        }
-
-        IN_VALID = true;
-        OUT_VALID = true;
-    }
-
-    getLatchFieldData()
-
-    LatchFieldData getIF_ID_LatchData() {
-        return 
-    }
-}
-
-Latch *l = new Latch(1).makeLatch();
-
-class Latch {
-private:
-    int _type;
-    LatchFieldData *lfData;
-protected:
-    virtual void update() = 0;
-    virtual void clear() = 0;
-    virtual void showStatus() = 0;
-public:
-    Latch(int type) {
-        _type = type;
-        return Latch()
-    }
-
-    Latch* makeLatch() {
-        switch (type)
-        {
-        case IF_ID:
-            return new IF_ID_Latch();
-        
-        case ID_EXE:
-            return new IF_EXE_Latch();
-        
-        case EX_MEM:
-            return new EX_MEM_Latch();
-        
-        case MEM_WB:
-            return new MEM_WB_Latch();
-
-        default:
-            return nullptr;
-        }
-    }
-};
-
-class IF_ID_Latch: public Latch {
-private:
-    u_int32_t _NPC = 0x0;
-    u_int32_t _IR = 0x0;
-
-public:
-    IF_ID_Latch(u_int32_t NPC, u_int32_t IR) {
-        update(NPC, IR);
-    }
-
-    void update(u_int32_t NPC, u_int32_t IR) {
-        _NPC = NPC;
-        _IR = IR;
-    }
-
-    void clear() {
-        _NPC = 0x0;
-        _IR = 0x0;
-    }
-
-    void showStatus() {
-        printf("======================================================\n");
-        printf("IF/ID Latch Status\n");
-        printf("* Next Program Counter:\t0x%08X\n", _NPC);
-        printf("* Current Instruction:\t0x%08X\n", _IR);
-        printf("======================================================\n");
-    }
-};
-
-class ID_EX_Latch: public Latch {
-private:
-    u_int32_t _NPC = 0x0;
-    u_int32_t _ReadData1 = 0x0;
-    u_int32_t _ReadData2 = 0x0;
-    u_int32_t _opcode = 0x0;
-    u_int32_t _rs = 0x0;
-    u_int32_t _rt = 0x0;
-    u_int32_t _rd = 0x0;
-    u_int32_t _shamt = 0x0;
-    u_int32_t _funct = 0x0;
-    u_int32_t _immed = 0x0;
-
-public:
-    ID_EX_Latch(u_int32_t NPC, u_int32_t IR) {
-        update(NPC, IR);
-    }
-
-    void update(u_int32_t NPC, u_int32_t IR) {
-        _NPC = NPC;
-        _IR = IR;
-    }
-
-    void clear() {
-        _NPC = 0x0;
-        _IR = 0x0;
-    }
-
-    void showStatus() {
-        printf("======================================================\n");
-        printf("IF/ID Latch Status\n");
-        printf("======================================================\n");
-    }
-};
-
-class EX_MEM_Latch: public Latch {
-private:
-    u_int32_t _NPC = 0x0;
-    u_int32_t _IR = 0x0;
-
-public:
-    EX_MEM_Latch(u_int32_t NPC, u_int32_t IR) {
-        update(NPC, IR);
-    }
-
-    void update(u_int32_t NPC, u_int32_t IR) {
-        _NPC = NPC;
-        _IR = IR;
-    }
-
-    void clear() {
-        _NPC = 0x0;
-        _IR = 0x0;
-    }
-
-    void showStatus() {
-        printf("======================================================\n");
-        printf("IF/ID Latch Status\n");
-        printf("======================================================\n");
-    }
-};
-
-class MEM_WB_Latch: public Latch {
-private:
-    u_int32_t _NPC = 0x0;
-    u_int32_t _IR = 0x0;
-
-public:
-    MEM_WB_Latch(u_int32_t NPC, u_int32_t IR) {
-        update(NPC, IR);
-    }
-
-    void update(u_int32_t NPC, u_int32_t IR) {
-        _NPC = NPC;
-        _IR = IR;
-    }
-
-    void clear() {
-        _NPC = 0x0;
-        _IR = 0x0;
-    }
-
-    void showStatus() {
-        printf("======================================================\n");
-        printf("IF/ID Latch Status\n");
-        printf("* Next Program Counter:\t0x%08X\n", _NPC);
-        printf("* Current Instruction:\t0x%08X\n", _IR);
-        printf("======================================================\n");
-    }
-};
-
 class Simulator: public Inst, Counter {
 private:
     FILE *fp;
     string _filename;
     int amount = 0;
 
-    u_int32_t PC = 0x0 - 4;
+    u_int32_t PC = 0x0;
     u_int32_t inst = 0x0;
 
     int32_t writeValIntoMemory = 0x0; // for writeback stage
@@ -442,7 +36,7 @@ private:
     }
 
     void initREG_MEMORY() {
-        REG_MEMORY[sp] = 0x1000000;
+        REG_MEMORY[sp] = 0x400000;
         REG_MEMORY[ra] = 0xFFFFFFFF;
     }
 
@@ -468,8 +62,10 @@ private:
             printf("0x%X: 0x%08X\n", 4 * i, INST_MEMORY[4 * i]);
         }
         printf("=========================\n");
-    
-        fclose(fp); 
+    }
+
+    void closeFile() {
+        if (fp != NULL) fclose(fp);
     }
 
     void updatePC() {
@@ -707,6 +303,11 @@ private:
         case SW:
             break;
 
+        case LUI:
+            writeValIntoMemory =
+                (int32_t)(immed) << 16;
+            break;
+
         case ADDI:
         // R[rt] = R[rs] + SignExtImm
         // rs가 가리키는 레지스터에 저장되어 있는 값 가져온다.
@@ -936,23 +537,39 @@ public:
     }
 
     ~Simulator() {
+        closeFile();
         delete MEMORY;
         delete INST_MEMORY;
     }
 
-    void run(bool debug) {
+    void run(bool debug, int startLoggingIdx) {
         if (fp == NULL) return;
 
+        bool approc = false; // debug
+
         while (PC != 0xFFFFFFFF) {
+            // debug
+            if (!approc && (PC >= startLoggingIdx)) {
+                printf("approached %d\n", startLoggingIdx);
+                approc = true;
+            }
+
             fetch();
-            if (debug) showPcAfterUpdating();
-            if (debug) showInstructorAfterFetch();
+            
+            if (debug && approc) {
+                showPcAfterUpdating();
+                showInstructorAfterFetch();
+            }
 
             decode();
-            if (debug) showInstructorAfterDecode();
+
+            if (debug && approc)
+                showInstructorAfterDecode();
 
             execute();
-            if (debug) showStatusAfterExecInst();
+
+            if (debug && approc)
+                showStatusAfterExecInst();
 
             accessMemory();
             writeback();
@@ -967,10 +584,10 @@ public:
 };
 
 int main() {
-    bool doDebug = false;
+    bool doDebug = true;
 
     Simulator s("/home/hyeonmin18/CAMP-2022/lab3/test_prog/input4.bin");
-    s.run(doDebug);
+    s.run(doDebug, 0x18ecc);
 
     return 0;
 }
