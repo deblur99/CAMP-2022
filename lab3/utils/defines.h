@@ -9,8 +9,8 @@
 #include <vector>
 #include <cstdlib>
 
-#define MEMORY_SIZE         0xFFFFFFFF      // original size is 0xFFFFFFFF
-#define INST_MEMORY_SIZE    0x100000
+#define MEMORY_SIZE         0x1000000       // original size is 0xFFFFFFFF
+#define INST_MEMORY_SIZE    0x1000000
 #define REG_MEMORY_SIZE     0x20            // values in each $0~$31 registers
 
 #define OPCODE_MASK     0x000000FF

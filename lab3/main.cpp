@@ -4,9 +4,8 @@
 
 using namespace std;
 
-// actual size is 0xFFFFFFFF
-int32_t *MEMORY;
-u_int32_t *INST_MEMORY;
+int32_t MEMORY[MEMORY_SIZE] = {0x0, };
+u_int32_t INST_MEMORY[INST_MEMORY_SIZE] = {0x0, };
 
 int32_t REG_MEMORY[REG_MEMORY_SIZE] = {0, };
 
@@ -21,22 +20,8 @@ private:
 
     int32_t writeValIntoMemory = 0x0; // for writeback stage
 
-    void initMEMORY() {
-        MEMORY = new int32_t[(u_int64_t)MEMORY_SIZE];
-        for (int i = 0; i < (u_int64_t)MEMORY_SIZE; i++) {
-            MEMORY[i] = 0xFFFFFFFF;
-        }
-    }
-
-    void initINST_MEMORY() {
-        INST_MEMORY = new u_int32_t[(u_int64_t)INST_MEMORY_SIZE];
-        for (int i = 0; i < (u_int64_t)INST_MEMORY_SIZE; i++) {
-            INST_MEMORY[i] = 0xFFFFFFFF;
-        }
-    }
-
-    void initREG_MEMORY() {
-        REG_MEMORY[sp] = 0x400000;
+    void initMemory() {
+        REG_MEMORY[sp] = 0x100000;
         REG_MEMORY[ra] = 0xFFFFFFFF;
     }
 
@@ -334,12 +319,12 @@ private:
 
         case SLTI:
             writeValIntoMemory = 
-                (int32_t)REG_MEMORY[rs] < signExtImm;
+                REG_MEMORY[rs] < signExtImm;
             break;
         
         case SLTIU:
             writeValIntoMemory = 
-                REG_MEMORY[rs] < (u_int32_t)signExtImm;
+                (u_int32_t)REG_MEMORY[rs] < (u_int32_t)signExtImm;
             break;
 
         // PC = PC + 4 + BranchAddr
@@ -426,7 +411,8 @@ private:
 
         switch (optype) {
         case 'R':
-            executedRTypeInst++;
+            if (inst != 0x00000000)
+                executedRTypeInst++;
             break;
 
         case 'I':
@@ -528,18 +514,14 @@ private:
 
 public:
     Simulator(string filename) {
-        initMEMORY();
-        initINST_MEMORY();
-        initREG_MEMORY();
-
         _filename = filename;
         loadFile();
+
+        initMemory();
     }
 
     ~Simulator() {
         closeFile();
-        delete MEMORY;
-        delete INST_MEMORY;
     }
 
     void run(bool debug, int startLoggingIdx) {
@@ -584,10 +566,10 @@ public:
 };
 
 int main() {
-    bool doDebug = true;
+    bool doDebug = false;
 
-    Simulator s("/home/hyeonmin18/CAMP-2022/lab3/test_prog/input4.bin");
-    s.run(doDebug, 0x18ecc);
+    Simulator s("/home/hyeonmin18/CAMP-2022/lab3/test_prog/simple3.bin");
+    s.run(doDebug, 0x0);
 
     return 0;
 }

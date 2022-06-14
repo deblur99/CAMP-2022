@@ -100,8 +100,41 @@ void test6() {
     printf("%d 0x%08X\n", (int32_t)(immed) << 16, (int32_t)(immed) << 16);
 }
 
+void test7() {
+    int writeValIntoMemory;
+    int rs = 0, rt = 1;
+    int32_t REG_MEMORY[2] = { 0x1111, 0xFFFF };
+    int32_t signExtImm = 0x00001000;
+
+    REG_MEMORY[1] = 0xFFFFFFFF;
+
+    // SLT : 1
+    writeValIntoMemory = 
+        REG_MEMORY[rs] < REG_MEMORY[rt];
+
+    printf("SLT : 0x%08X\n", writeValIntoMemory);
+    
+    // SLTU : 1
+    writeValIntoMemory = 
+        (u_int32_t)(REG_MEMORY[rs]) < (u_int32_t)(REG_MEMORY[rt]);
+
+    printf("SLTU : 0x%08X\n", writeValIntoMemory);
+
+    // SLTI : 0
+    writeValIntoMemory = 
+        REG_MEMORY[rs] < signExtImm;
+
+    printf("SLTI : 0x%08X\n", writeValIntoMemory);
+
+    // SLTIU : 0
+    writeValIntoMemory = 
+        (u_int32_t)REG_MEMORY[rs] < (u_int32_t)signExtImm;
+
+    printf("SLTIU : 0x%08X\n", writeValIntoMemory);
+}
+
 int main() {
-    test6();
+    test7();
     
     return 0;
 }
