@@ -4,10 +4,10 @@
 
 using namespace std;
 
-int32_t MEMORY[MEMORY_SIZE] = {0x0, };
-u_int32_t INST_MEMORY[INST_MEMORY_SIZE] = {0x0, };
+int32_t MEMORY[MEMORY_SIZE];
+u_int32_t INST_MEMORY[INST_MEMORY_SIZE];
 
-int32_t REG_MEMORY[REG_MEMORY_SIZE] = {0, };
+int32_t REG_MEMORY[REG_MEMORY_SIZE];
 
 class Simulator: public Inst, Counter {
 private:
@@ -21,7 +21,7 @@ private:
     int32_t writeValIntoMemory = 0x0; // for writeback stage
 
     void initMemory() {
-        REG_MEMORY[sp] = 0x100000;
+        REG_MEMORY[sp] = 0x1000000;
         REG_MEMORY[ra] = 0xFFFFFFFF;
     }
 
@@ -94,10 +94,6 @@ private:
     }   
 
     void decode() {
-        if (inst == EMPTY) {
-            return;
-        }
-
         // opcode
         opcode = inst >> 26;
         inst = inst & 0x03FFFFFF; // strip opcode
@@ -190,14 +186,15 @@ private:
     void executeRType() {
         if (opcode == RTYPE) {
             switch (funct) {
-            case MOVE:
-                writeValIntoMemory = REG_MEMORY[rs];
-                break;
-
             // R[rd] = R[rs] + R[rt]
             case ADD:
                 writeValIntoMemory =
                     REG_MEMORY[rs] + REG_MEMORY[rt];     
+                break;
+
+            case ADDU:
+                writeValIntoMemory =
+                    REG_MEMORY[rs] + REG_MEMORY[rt];    
                 break;
 
             // R[rd] = R[rs] - R[rt]
@@ -387,6 +384,10 @@ private:
     }
 
     void writebackRType() {
+        if (inst == NOP) {
+            return;
+        }
+
         if (opcode == RTYPE && funct != JR) {
             REG_MEMORY[rd] = writeValIntoMemory;
         }
@@ -568,7 +569,7 @@ public:
 int main() {
     bool doDebug = false;
 
-    Simulator s("/home/hyeonmin18/CAMP-2022/lab3/test_prog/simple3.bin");
+    Simulator s("/home/hyeonmin18/CAMP-2022/lab3/test_prog/input4.bin");
     s.run(doDebug, 0x0);
 
     return 0;

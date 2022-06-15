@@ -1,6 +1,10 @@
+#include <stdio.h>
+
+int foo(int a);
 int main()
+
 {
-	return foo(10);
+	printf("%d\n", foo(10));
 }
 
 int foo(int a)

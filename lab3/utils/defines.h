@@ -17,14 +17,12 @@
 
 // opcode list (from MIPS Green Sheet)
 // nop
-#define EMPTY           0x00000000
+#define NOP           0x00000000
 
 // R type OPCODE is 0 (except MFC0. its opcode is 0x10)
 #define RTYPE           0x0
 
 // R type funct
-#define MOVE            0x21
-
 #define ADD             0x20 
 #define ADDU            0x21
 #define AND             0x24
